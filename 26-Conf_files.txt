@@ -1,0 +1,132 @@
+props.conf and transforms.conf
+-------------------
+props.conf:
+
+source>Input>(assigning attributes to overall data)
+_raw,host,source,sourcetype,charset, Index
+
+parsing > raw events are broken into events (based on rules)
+          transforms the events
+
+Indexing>
+
+Search < spl
+
+=================
+UF,FW ---Indexer
+Input ---Parsing, Indexing, search
+
+Heavy FW,---Indexer
+Input, parsing ---Indexing, search
+
+UF,FW ---indexer --- search head
+Input ---Parsing, Indexing --- search
+
+
+UF,FW ---Heavy fwder---indexer
+Input--Parsing ---Indexing, search
+
+UF,FW---heavy fw ---indexer ----search head
+input ---parsing ---indexing ---search
+
+props.conf--splunk_home/etc/system/default
+customizet settings ---place props.conf in/etc/system/local
+                    for specific apps in /etc/apps/xxx/default/
+
+[default]
+--has global settings
+
+[source :: <>]
+[host :: <>]
+[rule :: <>]
+
+we can create our own conf say example.conf for a app which will then be applied for event splitting.
+[sourcetype]
+
+[source :: <> or use regex]
+key1 = val1
+priority = 3
+
+[source :: <> or use regex]
+key1 = val1
+priority = 5
+
+[host :: <> or use regex]]
+key1=xxxx
+priority = 5
+
+[rule :: <> or use regex]]
+
+precendence:
+host --->SourceType
+source --->host ---> SourceType
+
+[host :: (?-i) example] --- taking care of case sensitive
+======================
+Event line breaking using props.conf or through GUI
+#usage of props.conf
+
+Line Breaker Settings:
+truncate
+line_breaker (instead of new line rule)
+line_breaker lookbehind
+should_linemerge (for multiple line events this is true/single line events is false)
+break_only_before_date
+break_only_before
+must_break_after
+must_not_break_after
+must_not_break_before
+max_events
+
+For UF:
+event_breaker_enable
+event_breaker
+
+Timestamp Extraction:
+Time_prefix
+max_timestamp_lookahead
+time_format
+
+==============
+refer:https://regex101.com/
+
+take a xml file to test it..
+
+for example:
+<messages>hi<messages>
+this is a test
+<messages>new one<messages>
+
+([\r\n]*)<messages>
+
+==============
+If working on a file 
+should_linemerge =false
+sourcetype>advanced>(insert new field)LINE_BREAKER --give ur regex
+when we know where line starts>BREAK_ONLY_BEFORE --<messages>
+<MUST_BREAK_AFTER>=<messages>
+
+-------------------------
+Working with time related data and events
+41785:11 INFO [MACHINE] 150 GMT2017-12-16T22:13:47.3330Z (18 ms) [UUID] 1234577 [firm] 9001 onRequestExpired...
+break_only_before_date=true
+TIME_PREFIX:GMT
+TIME_FORMAT:as per time format
+MAX_TIMESTAMP_LOOKAHEAD=24
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

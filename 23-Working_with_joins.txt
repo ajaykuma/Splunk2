@@ -1,0 +1,98 @@
+#using join,map,selfjoin
+----------------------
+
+index="botsv1" source="stream:http" 
+|  stats count by dest_ip
+
+#inner join
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+|  head 10 
+| join type=inner dest_ip
+    [| search index="botsv1" sourcetype="suricata"]
+
+#innerjoin
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+|  head 10 
+| join type=inner dest_ip
+    [| search index="botsv1" sourcetype="suricata" 
+    | table dest_ip,sourcetype,flow.bytes_toclient,flow.bytes_toserver,transport]
+
+#outerjoin
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+|  head 10 
+| join type=outer dest_ip
+    [| search index="botsv1" sourcetype="suricata" 
+    | table dest_ip,sourcetype,flow.bytes_toclient,flow.bytes_toserver,transport]
+
+#we can use left and right too
+
+#we can use max=0/1
+#note** by default subsearch can fetch 10,000 rows.
+#use max=0 to specify no limits for subsearch
+#outerjoin
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+|  head 10 
+| join type=outer max=0 dest_ip
+    [| search index="botsv1" sourcetype="suricata" 
+    | table dest_ip,sourcetype,flow.bytes_toclient,flow.bytes_toserver,transport]
+
+#using overwrite
+#innerjoin
+index="botsv1" source="stream:http" 
+| eval dest_ip="notfound"
+|  table source,sourcetype,action,http_method,dest_ip 
+|  head 10 
+| join type=inner max=0 overwrite=false dest_ip
+    [| search index="botsv1" sourcetype="suricata" 
+    | table dest_ip,sourcetype,flow.bytes_toclient,flow.bytes_toserver,transport]
+
+#Map Search
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+| map search="|search index="botsv1" sourcetype="suricata" | search dest_ip="192.168.225.125""
+
+or
+
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+| map search="|search index="botsv1" sourcetype="suricata" | search dest_ip=$dest_ip$"
+
+or
+
+#selecting columns
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+| map search="|search index="botsv1" sourcetype="suricata" |table vendor,dest_ip,sourcetype| search dest_ip=$dest_ip$"
+
+#selfjoin
+joins data based on next values of a field and gives latest values
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+|  selfjoin dest_ip
+
+#overwrite false and keeping rows which have no matching values using 'keepsingle'
+index="botsv1" source="stream:http" 
+|  table source,sourcetype,action,http_method,dest_ip 
+|  selfjoin overwrite=false keepsingle=1 dest_ip
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

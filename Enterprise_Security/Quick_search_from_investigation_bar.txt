@@ -1,0 +1,17 @@
+Run a quick search from the investigation bar
+
+Run a search without opening the search dashboard by clicking Quick Search (icon) on the investigation bar. 
+
+The investigation bar is found at the bottom-right side of the Incident Review page or the Investigation Workbench.
+
+Add the search to the investigation in the investigation bar by clicking Add to Investigation.
+
+2) Use the Event Actions to add specific events in the search results to an investigation.
+
+3) To save the search results at investigation time, click Export to export the search results as a CSV file. 
+Add the search results as an attachment to a note on the investigation.
+
+4) Click Open in Search to view the search results on the Search dashboard.
+
+5) Enlarge or shrink your view of the search results by clicking and dragging the corner of the window. Double   click to expand the search view to cover most of your screen, or double click again to shrink it.
+

@@ -1,0 +1,67 @@
+Incident review workflow
+----------------------
+
+Steps:
+1.An administrative analyst monitors the Incident Review dashboard, sorting and performing high-level triage on newly
+created notable events.
+
+2.When a notable event warrants investigation, the administrative analyst assigns the event to a reviewing analyst 
+to start investigating the incident.
+
+3.The reviewing analyst updates the status of the event from New to In Progress, and begins investigating the 
+cause of the notable event.
+
+4.The reviewing analyst researches and collects information on the event using the fields and field actions in 
+the notable event. The analyst records the details of their research in the Comments field of the notable event. 
+
+5.As part of the research, the analyst might run adaptive response actions. 
+If the research proves that the notable event needs more lengthy investigation, the analyst can assign 
+the notable event to an investigation.
+
+6.After the reviewing analyst addresses the cause of the notable event and any remediation 
+tasks have been escalated or solved, the analyst sets the notable event status to Resolved.
+
+7.The analyst assigns the notable event to a final analyst for verification.
+
+8.The final analyst reviews and validates the changes made to resolve the issue, and sets the status to Closed.
+
+-----------------------------
+Filtering:
+
+Accelerate triage with tags and filters
+Speed up your notable event triage with search filters, tagging, and sorting. 
+For example, focus on groups of notable events or an individual notable event with the search filters 
+and time range selector. 
+Notable events contain Urgency, Status, and Owner fields to help you categorize, track, and assign events.
+
+-------------------------------
+Tagging:
+
+Simplify searching and add identifiers to notable events using tags. 
+Click Edit Tags in the field actions menu for a notable event field such as Title, Status, or Owner 
+to add new tags or modify existing ones. After you create a tag, you can use it to filter the dashboard.
+-------------------------------
+
+Filtering notable events:
+
+You can filter for notable events created by the same correlation search using the Correlation Search Name filter
+to type the name of the correlation search that created a notable event. 
+As you type, the correlation search names appear for you to select.
+
+Type SPL into the Search filter to search within the notable event details of notable events on Incident Review.
+
+If you added notable events to investigations, or generated short IDs for notable events to share them with other analysts,
+you can filter by the Associations filter to quickly view the notable events associated with a specific 
+investigation or the notable event represented by a short identifier. 
+
+However, the short ID filter dropdown lists all short IDs, including notable events that are suppressed. 
+If the notable event is suppressed, you will not be able to see it in Incident Review when filtering on short ID.
+
+If you want to see a filtered view of Incident Review by default, ask your ES admin to modify the navigation
+menu in Enterprise Security to link directly to a filtered view. 
+
+------------------------------------
+
+
+
+

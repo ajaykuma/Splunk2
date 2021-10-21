@@ -1,0 +1,20 @@
+Add an entry to an investigation from your action history with the investigation bar. Search for specific types of action history items over time to find the action history items that you want to add to your investigation.
+
+ From the investigation bar, click the (action history) icon
+
+2. Select an action history type and optionally change the time range.
+
+3. Click Search to retrieve a list of action history items.
+
+4. Find the actions that you want to add to the investigation. For example, view the dashboards that you viewed to
+    add them to your investigation. 
+
+5. The actions that you've taken display in the action history dialog box. You can only add actions from your 
+own action history.
+
+6. Locate the action you want to add and select the check box next to the action or actions that you want to 
+add to the investigation timeline.
+
+7. Click Add to Investigation.The actions are added to the investigation that you are viewing or that is selected 
+in the investigation bar.
+

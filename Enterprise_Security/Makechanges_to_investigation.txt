@@ -1,0 +1,78 @@
+How to Make changes to an investigation in Splunk Enterprise Security
+
+
+Make changes to the entries on an investigation from the timeline list or slide view.
+
+Change the title and description of an investigation
+
+Change the title and description of an investigation from the investigation bar. For example, change the name of the investigation as your investigation progresses to more accurately describe the security incident you are investigating.
+
+From the investigation bar, click the (edit investigation) icon. From the investigation view, click Edit.
+
+2. Change the title or description.
+
+3. Click Save.
+
+--------------------
+How to Update the status of an investigation
+
+Update the status of an investigation from the workbench, summary, or timeline view.
+
+While viewing the investigation, click Edit > Edit title, description, and status.
+
+Select a new status.
+
+Click Save.
+
+------------------------
+
+You can also update the status of an investigation from the investigation bar.
+
+Click the (All Investigations) icon and select your investigation
+
+After loading your investigation into the investigation bar, click the (edit investigation) icon and select a status.
+
+Click Save.
+------------------
+How to Delete investigation entries
+
+You can delete investigation entries when viewing the investigation timeline list or slide views.
+
+Find the entry on the investigation.
+
+Click Action > Delete Entry.
+
+Click Delete to confirm deleting the entry.
+
+To delete multiple entries:
+
+Click List to view the investigation as a list of entries.
+
+Select the check box next to the investigation entries that you want to delete.
+
+Click Action and select Delete.
+
+Click Delete to confirm deleting the entry.
+
+----------------
+How to Edit or delete a note
+
+Edit a note by clicking on it in the investigation notes window.
+
+From the investigation bar, click the (notes) icon
+2. Select the note.
+3. Edit the title, date, timeline display, the note itself, and add or delete attachments.
+
+Alternately, go to the timeline list view to edit or delete the note entry.
+
+1. From the timeline tab, click List View.
+2. From the actions column, you will see both notes and timeline notes.
+3. Select Edit Entry to edit it or Delete Entry to delete it.
+
+How to change the title of an entry
+
+You can change the title of an entry to make it more clear.
+1. Locate the notable event, Splunk event, action history item, or other entry on the investigation.
+2. From the Actions menu, click Edit.
+3. Change the title.
+

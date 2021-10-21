@@ -1,0 +1,62 @@
+index="botsv1" source="stream:http" 
+| table dest_ip,source
+|  append 
+    [search index=botsv1 sourcetype="fgt_utm"| rare limit=20 category]
+
+or
+
+index="botsv1" source="stream:http" 
+| table dest_ip,source
+|  append 
+    [search index=botsv1 sourcetype="fgt_utm" | rename dest as dest_id 
+    | rare limit=20 category 
+    | table category,sourcetype]
+
+or
+index="botsv1" source="stream:http" 
+| table dest_ip,source
+|  stats count by dest_ip
+|  append 
+    [search index=botsv1 sourcetype="fgt_utm" category="*" 
+    | where dest="$dest_ip$"]
+
+----------------
+index="botsv1" source="stream:http" earliest=08/01... latest=/08/15/...
+| append extendtimerange=true 
+[search index="botsv1" source="stream:http" earliest=08/10... latest=08/19  ]
+
+---------------
+subsearch--proper search
+search pipeline--not a proper search
+                 runs only when it encounters appendpipe command on resultset retunred by previous commands
+#
+index=botsv1 sourcetype="fgt_utm" category="*" 
+    |  stats count by category 
+|  table category,count 
+| sort count desc
+
+#search pipeline using appendpipe
+index=botsv1 sourcetype="fgt_utm" category="*" 
+    |  where category="Malicious Websites"
+|  table dest,category,count 
+| stats count by category 
+| appendpipe 
+    [stats count by category 
+    | eval dest="has issues"
+    ]
+
+#or
+
+index=botsv1 sourcetype="fgt_utm" category="*" 
+    |  where category in ("Malicious Websites","Meaningless Content","Malware_Generic.p0")
+|  table dest,category,count 
+| stats count by category 
+| appendpipe 
+    [stats count by category 
+    | eval dest="has issues"
+    ]
+
+#appendcols
+--appends the cols of result from another search
+
+

@@ -1,0 +1,20 @@
+Start a stream capture with Splunk Stream
+
+Start a Stream capture to capture packets on the IP addresses of the selected protocols over the time period that you select. You can view the results of the capture session on the Protocol Intelligence dashboards.
+
+A stream capture will not work unless you integrate Splunk Stream with Splunk Enterprise Security. 
+
+Click Add New Response Action and select Stream Capture to start a packet capture in response to a correlation search match.
+
+Type a Description to describe the stream created in response to the correlation search match.
+
+Type a Category to define the type of stream capture. You can view streams by category in Splunk Stream.
+
+Type the comma-separated event fields to search for IP addresses for the Stream capture. The first non-null field is 
+used for the capture.
+
+Type the comma-separated list of protocols to capture.
+
+Select a Capture duration to define the length of the packet capture.
+
+Type a Stream capture limit to limit the number of stream captures started by the correlation search.

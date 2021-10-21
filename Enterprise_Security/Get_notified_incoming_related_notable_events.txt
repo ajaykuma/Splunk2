@@ -1,0 +1,34 @@
+Get notified about incoming related notable events
+
+While you are investigating an event, you can get notified about incoming notable events that are related 
+to the investigation via the investigation toolbar. The investigation toolbar is available on all ES dashboards.
+ Settings enabled for an investigation in one dashboard are carried over to that investigation in other dashboards automatically.
+
+Enable the related notable event livefeed.
+
+Click the bell icon on the investigation toolbar at the bottom-right side of the Incident Review page, 
+the Investigation Workbench, or any ES dashboard.
+
+Toggle the switch to enable notification for the livefeed.
+
+Click Close.
+------------------
+While you are investigating, you will get a visual notification if any related notable events occur. 
+The bell icon color will change to orange within five minutes of the occurrence.
+
+Acknowledge the livefeed notification or add notable events to the investigation.
+
+Hover over the orange bell icon on the investigation bar at the bottom-right side of the Incident Review page 
+or the Investigation Workbench. This tells you how many notable events are available.
+
+Click the orange bell icon.
+
+The related notable event livefeed window appears, containing events from the last 48 hours.
+
+(Optional) Click + to add a notable event to the investigation.
+
+Click Mark All as Seen to clear the livefeed when you no longer want to see the related events. 
+This will also reset the notification, so that these no longer count against the notification number mentioned in step 1.
+
+Click Close.
+

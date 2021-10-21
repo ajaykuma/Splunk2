@@ -1,0 +1,68 @@
+Deep Learning Toolkit for Splunk
+
+https://splunkbase.splunk.com/app/4607/
+------------------------
+Machine learning ToolKit for Splunk
+
+https://splunkbase.splunk.com/app/2890/
+
+-----------------------
+Python for Scientific Computing (for Linux 64-bit)
+https://splunkbase.splunk.com/app/2882/
+-----------------------
+Python for Scientific Computing (for Windows 64-bit)
+https://splunkbase.splunk.com/app/2883/
+
+----------------------------------------------------------
+Deep Learning Toolkit needs other 2 as dependencies..
+----------------------------------------------------------
+
+Once loaded:
+Click and open Splunk Machine Learning Toolkit.
+
+Showcase shows various examples which you can learn from.
+
+To work on ML Problems/Test Algorithms> click on experiment:
+
+Data can be uploaded 
+--by creating indexes or
+--create lookup table files or
+--creating data model and working on datasets
+
+Create New Experiment:>
+###Smart Forecasting : can be for various use case, try a 'Time series dataset' and look
+for trends/seasonal information
+
+###Smart Clustering--can be used for Algorithms such as 'K-Means'
+https://github.com/ajaykuma/Datasets/blob/master/SalesJan2009.csv
+
+--Cluster based on latitude and longitude
+--for better visualization use latitude(y axis) and longitude(x-axis)
+
+###Predict Numeric Fields-For regression problems (Linear for example)
+https://github.com/ajaykuma/Datasets/blob/master/EcommerceCustomers.csv
+
+Predict '8th column values' ,using feature columns (4,5,6,7)
+
+###choose different algorithms to look at accuracy,confusion matrix etc values
+Predict Categorical Fields:(classification problems)[logistic/k-nearest/decision tree]
+https://github.com/ajaykuma/Datasets/blob/master/iris.csv
+---classify species
+
+https://github.com/ajaykuma/Datasets/blob/master/breast-cancer-wisconsin.data (convert this to csv)
+--classify class
+
+###Forecast Time-series
+https://github.com/ajaykuma/Datasets/blob/master/opsd_germany_daily.txt
+https://github.com/ajaykuma/Datasets/blob/master/power.csv
+https://github.com/ajaykuma/Datasets/blob/master/coal.csv
+
+Note** here date field needs to be converted into datatime format for right usage...
+
+
+
+
+
+
+
+

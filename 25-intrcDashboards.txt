@@ -1,0 +1,190 @@
+Creating Dashboards (Interactive)
+--------------------
+--create search
+
+index="botsv1" source="stream:http" 
+      | table _time,source,c_ip,dest,http_method,http_user_agent,request_time,response_time,src_ip,url
+      | eval year=strftime(_time, "%Y") 
+      | fillnull value="Not Defined" year,c_ip,http_method,dest,url </query>
+
+--create dashboard
+
+from source:
+
+Note**--look at final form at end
+
+<form>
+  <label>bot_testDB</label>
+  <search id="base_search">
+    <query>index="botsv1" source="stream:http" 
+     | table _time,source,c_ip,dest,http_method,http_user_agent,request_time,response_time,site_srp_ip 
+     | eval year=strftime(_time, "%Y") 
+     | fillnull value="Not Defined" year,c_ip </query>
+    </search>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="dest">
+      <label>dest</label>
+      <search base="base_search">
+      <query>
+         | stats count by dest</query>
+      </search>
+    </input>
+  </fieldset>
+</form>
+
+save it
+
+--edit dropdown
+Note**--look at final form at end
+repeat same for other interesting fields:
+<form>
+  <label>bot_testDB</label>
+  <search id="base_search">
+    <query>index="botsv1" source="stream:http" 
+     | table _time,source,c_ip,dest,http_method,http_user_agent,request_time,response_time,site_srp_ip 
+     | eval year=strftime(_time, "%Y") 
+     | fillnull value="Not Defined" year,c_ip </query>
+  </search>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="dest">
+      <label>Destination IP</label>
+      <search base="base_search">
+        <query>
+         | stats count by dest</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>dest</fieldForLabel>
+      <fieldForValue>dest</fieldForValue>
+    </input>
+    <input type="dropdown" token="c_ip">
+      <label>Client IP</label>
+      <search base="base_search">
+        <query>
+         | stats count by c_ip</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>c_ip</fieldForLabel>
+      <fieldForValue>c_ip</fieldForValue>
+    </input>
+      <input type="dropdown" token="http_method">
+      <label>HTTP Request</label>
+      <search base="base_search">
+        <query>
+         | stats count by http_method</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+      <fieldForLabel>http_method</fieldForLabel>
+      <fieldForValue>http_method</fieldForValue>
+    </input>
+  </fieldset>
+</form>
+
+Now Add panels:
+1st panel: single value
+Query:
+index="botsv1" source="stream:http" 
+| table _time,source,c_ip,dest,http_method,http_user_agent,request_time,response_time,site_srp_ip 
+| eval year=strftime(_time, "%Y") 
+| fillnull value="Not Defined" year,c_ip 
+| dedup c_ip 
+|  stats count
+
+or | dedup c_ip 
+|  stats count as clientips
+
+#make sure when this search is added ,edit and add it as base search
+
+--format panels..
+
+#final form with couple of panels:
+<form>
+  <label>HttpDBv1.0</label>
+  <search id="base_search">
+    <query>index="botsv1" source="stream:http" 
+      | table _time,source,c_ip,dest,http_method,http_user_agent,request_time,response_time,src_ip,url
+      | eval year=strftime(_time, "%Y") 
+      | fillnull value="Not Defined" year,c_ip,http_method,dest,url </query>
+  </search>
+  <description>This is First Stream_HTTP DB</description>
+  <fieldset submitButton="false">
+    <input type="dropdown" token="dest" searchWhenChanged="true">
+      <label>Destination_IP</label>
+      <fieldForLabel>dest</fieldForLabel>
+      <fieldForValue>dest</fieldForValue>
+      <search base="base_search">
+        <query>| stats count by dest</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="dropdown" token="c_ip" searchWhenChanged="true">
+      <label>Client_IP</label>
+      <fieldForLabel>c_ip</fieldForLabel>
+      <fieldForValue>c_ip</fieldForValue>
+      <search base="base_search">
+        <query>| stats count by c_ip</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+    <input type="dropdown" token="http_method" searchWhenChanged="true">
+      <label>HTTP Request</label>
+      <fieldForLabel>http_method</fieldForLabel>
+      <fieldForValue>http_method</fieldForValue>
+      <search base="base_search">
+        <query>| stats count by http_method</query>
+      </search>
+      <choice value="*">All</choice>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <single>
+        <title>Client_IP_Count</title>
+        <search base="base_search">
+          <query>| dedup c_ip 
+            |  stats count</query>
+          <earliest>-24@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>HTTP_By_year</title>
+        <search base="base_search">
+          <query>| eval day=strftime(_time, "%d") | timechart span=7d count(http_method) by day</query>
+          <earliest>-24@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.drilldown">none</option>
+      </chart>
+    </panel>
+  </row>
+</form>
+
+Additional query for more panels:
+index="botsv1" source="stream:http" 
+      | table _time,source,c_ip,dest,http_method,http_user_agent,request_time,response_time,src_ip,url
+      | eval year=strftime(_time, "%Y") 
+      | fillnull value="Not Defined" year,c_ip,http_method,dest,url 
+| eval day=strftime(_time, "%d") 
+| join type=inner dest
+    [| search index="botsv1" sourcetype="suricata" 
+    | rename dest_ip as dest 
+    | table dest,sourcetype,flow.bytes_toclient,flow.bytes_toserver,transport]
+

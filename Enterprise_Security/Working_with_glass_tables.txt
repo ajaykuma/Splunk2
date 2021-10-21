@@ -1,0 +1,67 @@
+How to build a glass table visualization
+
+Create a glass table using the flexible canvas and editing tools on the glass table editor.
+
+From the list of glass tables, click the name of the glass table.
+
+Use the editing tools to upload images, draw shapes, add icons, add text, and make connections to reflect the relationship between the metrics.
+
+In the panel of security metrics, click any metric to view the key indicator search widgets available to add. If you do not see the one you need, an ES admin can create a new key indicator search. 
+
+Click and drag one or more of the key indicator search widgets onto the drawing canvas.A widget appears on the canvas, displaying the associated search values, which continuously update in real time. 
+
+Add additional widgets to build out the dynamic elements of your visualization.
+
+Click and drag Ad hoc Search onto the drawing canvas to add a custom widget that displays the results of a search. 
+
+Click Save.
+
+-----------------
+How to Configure widgets
+
+After you add a widget to your glass table, configure it to optimize performance, add a custom drilldown, and customize the widget appearance for a particular glass table design. Key indicator searches populate the widgets included in the glass table. Make changes to the key indicator searches on the Content Management dashboard.
+
+In the glass table editor, click a widget.
+
+For Custom Drilldown, click On.
+
+Select a drilldown destination or type a URL.
+
+For Viz Type, select an appropriate option to display your search results. Visualization types include single-value, gauge, sparkline, and single value delta.
+
+Click Update to update the widget configuration.
+
+Click Save.
+
+Key indicator search values update at regular intervals according to the search schedule that you define when you create the key indicator search.
+-------------
+How to create and configure search widgets
+
+You can also create a custom widget to display search results. Add a new search to any glass table, define a custom search string, and customize the appearance of the search widget using a variety of visualization types.
+
+Write your custom search outside of glass table to confirm that it produces expected results. Your custom search must include the timechart command, or stats by _time to use thresholding.
+
+In the glass table editor, click and drag Ad hoc Search onto the canvas.
+
+In the Configurations panel, for Search Type, type your custom search string.
+
+Use the time picker to select the end time for your search. Defaults to Now.
+
+In the Earliest Time menu, select the earliest time for the search. This determines the start time for your search, relative to the End Date and Time that you set in the time picker, and determines the time range over which your search applies. Security metrics by default display results from the previous 48 hours.
+For example, if the time range picker is set to Now, the security metric searches the previous 48 hours and displays results. If you change the time range picker to 6 hours ago, the security metric displays results from -54 hours to -6 hours.
+
+5. For Threshold Field, type the field that you want to use as the threshold for your search.	For example, count.
+
+6. For Thresholds, click On to enable the thresholds for the search widget.
+
+7. Click Edit to edit the threshold.
+
+8. In the threshold window, add thresholds for the search widget. This determines the color of the widget, which indicates the current status of the metric.
+
+9. Select a Viz Type for your search widget.
+
+10. Click Update to update the widget to the new visualization and display your search results over the specified time range.
+
+11. Click Save.
+
+--------------

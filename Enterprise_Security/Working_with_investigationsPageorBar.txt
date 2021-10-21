@@ -1,0 +1,19 @@
+Start an investigation from the Investigations page
+
+Click Create New Investigation.
+Type a title.
+Select a status.
+(Optional) Type a description.
+Click Save.
+
+------------------
+Start an investigation from the investigation bar
+When viewing dashboards in Splunk Enterprise Security, you can see an investigation bar at the bottom of the page. You can use the investigation bar to track your investigation progress from any page in Splunk Enterprise Security.
+
+1. Click the + icon to create an investigation.
+2. Type a title.
+3. Select a status.
+4. (Optional) Type a description.
+5. Click Save.
+
+The investigation is loaded in the investigation bar.

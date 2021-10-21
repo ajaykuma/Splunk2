@@ -1,0 +1,23 @@
+Modify a risk score with a risk modifier
+
+Modify a risk score as a result of a correlation search or in response to notable event details with the 
+Risk Analysis adaptive response action. 
+
+The risk adaptive response action creates a risk modifier event. 
+You can view the risk modifier events on the Risk Analysis dashboard in Enterprise Security.
+
+Click Add New Response Action and select Risk Analysis.
+
+Type the score to assign to the risk object.
+
+Select a field from the notable event to apply the risk score to for the Risk Object Field.
+
+Select the Risk Object Type to apply the risk score to.
+
+Run a script
+Run a script stored in $SPLUNK_HOME/bin/scripts.
+
+Click Add New Response Action and select Run a script.
+
+2. Type the filename of the script.
+

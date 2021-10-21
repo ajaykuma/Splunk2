@@ -1,0 +1,112 @@
+Buckets: Settings in indexes.conf determine when a bucket moves from one state to the next.
+
+
+When certain conditions are met (for example, the hot bucket reaches a certain size or the indexer gets restarted), 
+the hot bucket becomes a warm bucket ("rolls to warm"), and a new hot bucket is created in its place. 
+The warm bucket is renamed but it remains in the same location as when it was a hot bucket. 
+Warm buckets are searchable, but they are not actively written to. There can be a large number of warm buckets.
+
+Once further conditions are met (for example, the index reaches some maximum number of warm buckets), the indexer begins
+to roll the warm buckets to cold, based on their age. It always selects the oldest warm bucket to roll to cold. 
+Buckets continue to roll to cold as they age in this manner. Cold buckets reside in a different location from hot 
+and warm buckets. You can configure the location so that cold buckets reside on cheaper storage.
+
+Finally, after certain other time-based or size-based conditions are met, cold buckets roll to the frozen state, 
+at which point they are deleted from the index, after being optionally archived.
+
+If the frozen data has been archived, it can later be thawed. Data in thawed buckets is available for searches.
+
+
+Looking into index.conf
+
+--contains global paramteres (not for any specific index)
+--index specific defaults
+--look at different stanzas for different indexes
+
+such as 
+[provider-family:hadoop]
+[main]
+[history]
+[summary]
+[_internal]
+[_audit]
+[_fishbucket]
+[splunklogger]
+[_introspection]
+[_telemetry]
+[_metrics]
+[_metrics_rollup]
+
+
+for example:
+[main] 
+homePath = $SPLUNK_DB/defaultdb/db 
+coldPath = $SPLUNK_DB/defaultdb/colddb 
+thawedPath = $SPLUNK_DB/defaultdb/thaweddb 
+maxMemMB = 20
+maxConcurrentOptimizes = 6
+maxHotIdleSecs = 86400 
+maxHotBuckets = 10 
+maxDataSize = auto_high_volume 
+
+=============================
+homePath The path that contains the hot and warm buckets. (Required.)
+$SPLUNK_HOME/var/lib/splunk/defaultdb/db/ (for the default index only)
+
+coldPath The path that contains the cold buckets.(Required.)
+$SPLUNK_HOME/var/lib/splunk/defaultdb/colddb/ (for the default index only)
+
+thawedPath The path that contains any thawed buckets. (Required.)
+$SPLUNK_HOME/var/lib/splunk/defaultdb/thaweddb/ (for the default index only)
+
+repFactor Determines whether the index gets replicated to other cluster peers.
+(Required for indexes on cluster peer nodes.)
+--0 (which means that the index will not get replicated to other peers; 
+--For clustered indexes, you must set repFactor to auto, which causes the index to get replicated.
+
+maxHotBuckets The maximum number of concurrent hot buckets. This value should be at least 2,
+to deal with any archival data. The main default index, for example, has this value set to 10.
+--3- for new, custom indexes.
+
+maxDataSize Determines rolling behavior, hot to warm. The maximum size for a hot
+bucket. When a hot bucket reaches this size, it rolls to warm. This attribute also
+determines the approximate size for all buckets.
+--Special value "auto", which sets the size to 750MB.
+
+maxWarmDBCount Determines rolling behavior, warm to cold. The maximum number of warm
+buckets. When the maximum is reached, warm buckets begin rolling to cold.
+--default:300
+
+maxTotalDataSizeMB Determines rolling behavior, cold to frozen. The maximum size of an index.
+When this limit is reached, cold buckets begin rolling to frozen.
+--default:500000 (MB)
+
+frozenTimePeriodInSecs Determines rolling behavior, cold to frozen. Maximum age for a bucket,
+after which it rolls to frozen.
+--default:188697600 (in seconds; approx. 6 years)
+
+#If either attribute is missing or set to 0, there is no limit upto disk capacity available.
+homePath.maxDataSizeMB
+coldPath.maxDataSizeMB Maximum size for homePath (hot/warm bucket storage) or coldPath (cold
+bucket storage). 
+
+maxVolumeDataSizeMB Maximum size for a volume 
+
+
+Rawdata journal compression
+When the indexer indexes data, it writes the data to the rawdata journal. (compressed post-indexing)
+Default: gzip algorithm, but you can change the compression algorithm through the
+
+journalCompression setting in indexes.conf>
+journalCompression = gzip
+
+
+Available compression algorithms are:
+
+· gzip
+· lz4
+· zstd
+
+Changing will only affect new buckets.
+
+

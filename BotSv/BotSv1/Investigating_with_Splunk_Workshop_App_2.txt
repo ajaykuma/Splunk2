@@ -1,0 +1,95 @@
+#Instead we can also use this app and continue splunking..
+"Investigating with Splunk Workshop App"
+-----------
+#Access the App
+
+Continued from .......App_1.txt file
+
+#Click
+#Identifying the File that Defaced Our Web Server (Part 1 of 2)
+#What is the name of the file that defaced the imreallynotbatman.com website?
+
+#look at our web server to determine who is communicating with it. 
+#Using our Suricata data and the IP address that we identified earlier for our web server (192.168.250.70), 
+#we can see there are internal systems communicating with the web server, 
+#but there are no external systems originating traffic and generating alerts. 
+
+#Good to see if the web server is the source of the traffic. 
+index=botsv1 dest=192.168.250.70 sourcetype=suricata src=* | stats count by src
+
+#Looking at directional flow of data
+index=botsv1 src=192.168.250.70 sourcetype=suricata | stats count by dest_ip | sort count desc
+
+index=botsv1 src=192.168.250.70 sourcetype=suricata | stats count by src,dest_ip | sort count desc
+
+#pivot into the external destination IP addresses and view other interesting fields. 
+#With 23.22.63.114 as our destination, we notice that http.url has two php files and a jpeg. 
+#looking at http.url
+
+index=botsv1 src=192.168.250.70 sourcetype=suricata dest_ip=23.22.63.114 | stats count by http.url |
+
+#Click>
+#Validating Using Firewall Logs the File that Defaced Our Web Server (Part 2 of 2)
+#name of the file that defaced the imreallynotbatman.com website?
+
+#Looking at firewall data
+index=botsv1 sourcetype=fgt_utm "192.168.250.70"
+
+#Source perspective(good to look at least value)
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" | stats count by src | sort count desc
+
+#Dest perspective
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" | stats count by dest | sort count desc
+
+#Finding where dest is not websrvr
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" NOT dest="192.168.250.70" | stats count
+
+#Finding where source is not websrvr
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" NOT src="192.168.250.70" | stats count
+
+#Using website categorization to filter
+#UTM (Unified Threat Management) devices (or next-generation firewalls) often rate or classify various web sites
+# much like standalone web filtering gateways (e.g. Blue Coat).
+
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" NOT dest="192.168.250.70"
+
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" NOT dest="192.168.250.70" | stats count by category
+
+#Finally getting confirmation based on firewall
+index=botsv1 sourcetype=fgt_utm "192.168.250.70" NOT dest="192.168.250.70" category="Malicious Websites"
+
+
+#Identifying the Fully Qualified Domain Name of the System that Defaced the Web Server
+#We earlier found the file
+index=botsv1 sourcetype=fgt_utm "poisonivy-is-coming-for-you-batman.jpeg"
+
+#or specifically
+index=botsv1 sourcetype=fgt_utm "poisonivy-is-coming-for-you-batman.jpeg" | table _time url hostname
+
+#What other source types saw this file
+index=botsv1 dest=23.22.63.114 "poisonivy-is-coming-for-you-batman.jpeg" src=192.168.250.70 | stats count by sourcetype
+
+#using stream:http and finding URL
+index=botsv1 dest=23.22.63.114 "poisonivy-is-coming-for-you-batman.jpeg" src=192.168.250.70 sourcetype=stream:http | stats count by url
+
+#searching if we could not find the file name
+index=botsv1 answer=23.22.63.114 sourcetype=stream:dns | stats values("name{}")
+
+#click>
+#explore information in Using OSINT to Identify Attacker Infrastructure
+
+#click>
+ explore information in Using OSINT To Create Linkages Between Email and Infrastructure
+
+#click>
+explore information in Using OSINT to Identify Associated Malware
+
+#click>
+explore information in Using OSINT to Find Clues Pertaining to the Adversary
+
+
+
+
+
+
+

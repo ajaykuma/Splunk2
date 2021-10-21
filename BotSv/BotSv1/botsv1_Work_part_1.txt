@@ -1,0 +1,212 @@
+https://github.com/splunk/botsv1
+--------------------
+Install Splunk Enterprise on Windows/Linux machine.
+For instructions refer : ''
+
+Download add-ons/apps as listed on github
+For instructions on adding apps/index app refer: ''
+
+Splunk Indexed
+This is recommended way to explore and analyze the BOTS dataset.
+
+Original data was generated 6 years ago by splunk administrators.
+Then they used it for live CTF for a year , then it was open-sourced.
+
+Download the dataset from this location: botsv1_data_set.tgz (6.1GB compressed)
+
+Alternatively, this collection represents a much smaller version of the original dataset containing only attack data. 
+In other words, "just the needles, no haystack." botsv1-attack-only.tgz(135MB compressed)
+
+We can upload this data to our splunk by either adding it as app 
+Apps>settings icon>Install app from file >choose file > botsv1_data_set.tgz or botsv1-attack-only.tgz
+
+Another option is to unzip and untar and copy the folder botsv1_data_set or botsv1-attack-only into 
+SPLUNK_HOME/etc/apps i.e. in windows:C:\Program Files\Splunk\etc\apps
+
+--restart splunk
+
+After uploading 'botsv1_data_set' app or 'botsv1-attack-only' app look under 'What to Search' which shows the 
+number of events.
+Note** I uploaded 'botsv1-attack-only' .
+
+Clicking on data summary shows:
+Host and count (here count matches the number of events)
+number of events = xxxxxx
+
+Additionally click on options:
+Hosts(1)---ipaddresses/names etc
+Sources(15)--show more meaningful information
+For example: '/var/log/suricata/eve.json' for suricata which is opensource intrusion detection system.
+It shows about attacks, here events are such as 'Trojan detected','dos attack detected'.
+For example: 'C:\inetpub\logs\LogFiles\W3SVC1\u_ex160810.log'--webserver log and inetpub means windows based web server
+For example: 'WinEventLog:Microsoft-Windows-Sysmon/Operational'--Microsoft sysmon
+For example: 'WinEventLog:Application'
+For example: 'WinEventLog:Security'
+For example: 'WinEventLog:System'
+SourceTypes(5)--shows different source types
+
+Querying:
+All data we would want to look into is in index="botsv1"
+
+#find sourcetypes
+Query:
+| metadata type=sourcetypes index=botsv1
+
+Search and reporting > search > index = "botsv1" (If time selected 'Last 24 hours')-- No results found.
+Note** we can choose all time ,which will show us all the data, but data might be huge,so first
+
+if 'index="botsv1"' selected , shows total 955,807 events.
+
+Let's turn on the 'Event Sampling'
+Sampling: 1:1000 (i.e. show every 1000th event)
+Now select 'All Time'
+
+>search
+
+Look at count of Events in comparision to earlier known total number of events.
+It may show: 941 events
+Note** Remember its a random sampling of events, which means if we search again we would get different events.
+
+Looking at results might show different Hosts
+such as 'host= ubuntu----'
+        'xml data for microsoft windows sysmon' [sysmon is a microsoft product that monitors the registry and eventlogs and fwds it]'
+        etc..
+
+=========================================
+Viewing Sourcetypes:
+From left menu, check under 'SELECTED FIELDS',if sourcetype shows up <click on it>
+if not, Click on 'All Fields' and select 'sourcetype' to add to 'SELECTED FIELDS'
+
+Click on sourcetype
+Top 10 Values	Count	%	 
+xmlwineventlog	270,597	28.311%	
+stream:smb	151,568	15.858%	
+suricata	125,584	13.139%	
+wineventlog	87,725	9.178%	
+WinRegistry	74,720	7.817%	
+stream:ip	62,083	6.495%	
+fgt_traffic	55,279	5.783%	
+stream:tcp	28,291	2.96%	
+fgt_utm		25,586	2.677%	
+stream:http	23,936	2.504%
+
+Understanding some source types:
+XmlWinEventLog:Microsoft-Windows-Sysmon/Operational  ====="Sysmon, a windows monitoring tool from microsoft"
+stream:smb,stream:ip,stream:tcp,stream:http==============="Splunk Stream, which monitors live network traffic"
+suricata=================================================="The Suricata Intrusion Detection System(IDS)"
+wineventlog and WinRegistry==============================="Windows OS"
+fgt_traffic and fgt_utm==================================="Fortigate firewalls"
+
+Optional:
+If we see long Sysmon source type such as "XmlwinEventLog:Microsoft-Windows-Sysmon/Operational"
+we can create a macro 'sysmon' to search events with same source type.
+
+Settings> advanced search > search macros > add new
+name:sysmon
+Defintion:index=botsv1 sourcetype="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational"
+<save>
+
+If created try searching using this macro in search 
+search >
+Query: `sysmon`
+
+Looking at some interesting processes (choose sampling 1:10)
+Query: shows 4205 events
+
+`sysmon` Image="*powershell.exe" OR Image="*msbuild.exe" OR Image="*psexec.exe" OR Image="*at.exe" OR 
+Image="*schtasks.exe" OR Image="*net.exe" OR Image="*vssadmin.exe" OR Image="*utilman.exe" OR Image="*wmic.exe"
+OR Image="*mshta.exe" OR Image="*wscript.exe" OR Image="*cscript.exe" OR Image="*cmd.exe" OR Image="*whoami.exe"
+OR Image="*mmc.exe" OR Image="*systeminfo.exe" OR Image="*csvde.exe" OR Image="*certutil.exe"
+| stats values(CommandLine) by Image
+
+Changing search:
+Query: 
+`sysmon` Image="*powershell.exe" OR Image="*msbuild.exe" OR Image="*psexec.exe" OR Image="*at.exe" OR 
+Image="*schtasks.exe" OR Image="*net.exe" OR Image="*vssadmin.exe" OR Image="*utilman.exe" OR Image="*wmic.exe"
+OR Image="*mshta.exe" OR Image="*wscript.exe" OR Image="*cscript.exe" OR Image="*cmd.exe" OR Image="*whoami.exe"
+OR Image="*mmc.exe" OR Image="*systeminfo.exe" OR Image="*csvde.exe" OR Image="*certutil.exe"
+| stats values(CommandLine) by host
+
+Let's look at certain hosts (endpoints) by looking under matched events.
+Investing hosts individually
+we1149srv
+we8105desk
+we9041srv
+
+Query:
+`sysmon` host=we8105desk | stats values(CommandLine) by Image _time
+
+Sysmon Event Types:
+Event ID 1: Process creation
+Event ID 2: A process changed a file creation time
+Event ID 3: Network connection
+Event ID 4: Sysmon service state changed
+Event ID 5: Process terminated
+Event ID 6: Driver loaded
+Event ID 7: Image loaded
+Event ID 8: CreateRemoteThread
+Event ID 9: RawAccessRead
+Event ID 10: ProcessAccess
+Event ID 11: FileCreate
+Event ID 12: RegistryEvent (Object create and delete)
+Event ID 13: RegistryEvent (Value Set)
+Event ID 14: RegistryEvent (Key and Value Rename)
+Event ID 15: FileCreateStreamHash
+Event ID 17: PipeEvent (Pipe Created)
+Event ID 18: PipeEvent (Pipe Connected)
+Event ID 19: WmiEvent (WmiEventFilter activity detected)
+Event ID 20: WmiEvent (WmiEventConsumer activity detected)
+Event ID 21: WmiEvent (WmiEventConsumerToFilter activity detected)
+Event ID 255: Error
+
+#Event types in Botsv1 -
+Query:
+index=botsv1 sourcetype=wineventlog | stats count by event_id EventType
+
+or 
+
+`sysmon` | stats count by EventID, EventDescription
+
+or
+
+`sysmon` | stats count by EventID
+
+
+Query:
+index=botsv1 sourcetype=wineventlog | stats count by EventType
+
+We can then look at event types, and count of events.
+
+
+===========================================================================================================
+Viewing stream:http Events
+
+In the "sourcetype" , in the "Top 10 Values list" , click on 'stream:http'
+i.e. 
+sourcetype = "stream:http"
+
+--This shows records of http events on network( collected by splunk as splunk does live network monitoring)
+
+This should be added to your search bar now 
+Query: index=botsv1 sourcetype="stream:http"
+
+Look at the number of events
+23,936 events shown ,if no sampling was selected.
+22 events,if sampling 1:1000 was selected.
+
+Looking at results shows events that may contain: bytes, bytes_in, html page, destination ip, etc..
+We can also stop formatting by clicking on [-] and show it as raw text...(which can then be used for searching)
+
+more in part-2
+
+
+
+
+
+
+
+
+
+
+
+

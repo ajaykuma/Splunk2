@@ -1,0 +1,35 @@
+How to make changes to the collaborators on an investigation
+
+If you are a collaborator on an investigation with write permissions, you can change the permissions of other collaborators on the investigation.
+
+Click the icon of a collaborator.
+
+Change the Write permissions. By default, all collaborators have Yes for Write permissions. All investigations must have at least one collaborator with write permissions.
+
+You can remove a collaborator if they are not the only collaborator on the investigation with write permissions.
+
+Click the icon of a collaborator.
+
+Click Remove.
+----------------
+How to review an investigation in Splunk Enterprise Security
+
+
+Review an entry's investigation for training or research purposes. Click an entry on an investigation to see all details associated with it.
+
+For notes with file attachments, click the file name to download the file attachment.
+
+For notable events, click View on Incident Review to open the Incident Review dashboard filtered on that specific notable event.
+
+For action history entries, you can repeat the previously-performed action. For a search action history entry, click the search string to open it in search. For a dashboard action history entry, click the dashboard name to view the dashboard.
+
+-------------------
+How to share or print an investigation in Splunk Enterprise Security
+
+To share an investigation with someone that does not use Splunk Enterprise Security, such as for auditing purposes, you can print any investigation or save any investigation as a PDF.
+
+1. From the investigation, click the (print) icon. Splunk Enterprise Security generates a formatted version of the investigation timeline with entries in chronological order. The order of the entries in the printout remains in the original order, even if you manually edit the times so that they show up differently in the user interface.
+ 
+
+2. Print the investigation or save it as a PDF using the print dialog box options.
+

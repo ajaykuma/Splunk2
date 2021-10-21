@@ -1,0 +1,70 @@
+https://github.com/splunk/botsv1
+'botsv1-attack-only' continued...
+
+Query: index=botsv1
+9458 Events (with sampling 1:100)
+
+Click on sourcetypes
+xmlwineventlog	2,679	28.011%	
+stream:smb	1,475	15.422%	<---raw packets captured by splunk by sniffing network(say like wireshark)[smb-server message block]
+suricata	1,288	13.467%	<--IDS(intrusion detection system)
+wineventlog	892	9.327%	
+WinRegistry	742	7.758%	
+stream:ip	634	6.629%	<---raw packets captured by splunk by sniffing network(say like wireshark)[ip]
+fgt_traffic	538	5.625%	<--fortigate firewalls
+stream:tcp	276	2.886%	<---raw packets captured by splunk by sniffing network(say like wireshark)[tcp]
+fgt_utm	268	2.802%	        <--fortigate utm
+stream:http	261	2.729%<---raw packets captured by splunk by sniffing network(say like wireshark)[http]
+
+Note** Splunk doesn't store the full packet captures, instead it stores metadata, summarizing the information.(to make it more indexable/small)
+
+Try the query:
+index=botsv1 sourcetype="stream:http"
+
+and use 'Timeline' to zoom in:
+Out of 232 events shown (with sampling 1:100)
+Double click on '126 events' > and narrow down to looking at one single event from time line.
+
+We can change the job settings by Job> edit settings [remember each search is a job]
+To look at all jobs > on top > Activity > Jobs
+every search that was done is remembered for 10 mins (thus we can change the quota in job>edit settings)
+
+Query:
+index=botsv1 sourcetype="stream:http"
+shows events > Let's select 'Interesting Field'>action 2 (which shows 2 different type of actions:allowed and blocked)
+Look at total of these two type of actions which might not be same as total events shown .
+Because: We are looking at unstructured data and that basically shows all events with or without these fields.
+It also shows how many different values of fields occur and what is %age of it in total events.
+
+Searching based on this field 'action'
+
+index=botsv1 sourcetype="stream:http" action="*"
+index=botsv1 sourcetype="stream:http" action!="*"
+index=botsv1 sourcetype="stream:http" NOT action="*"
+or being specific
+index=botsv1 sourcetype="stream:http" action="allowed"
+index=botsv1 sourcetype="stream:http" action!="allowed"
+
+==============
+Look at 'INTERESTING FIELDS' > punct (takes punctuation marks of data)
+[may be interesting when working on web security tasks as objections/directory traversals use punctuations]
+==============
+Looking at 'INTERESTING FIELDS' > location ( shows locations and shows 85 different values)
+Clicking on location shows only Top values (top 10) or Rare value( rare 10)
+
+Select Top values
+Query: index=botsv1 sourcetype="stream:http"| top limit=20 location
+change the limit as per requirement
+Query: index=botsv1 sourcetype="stream:http"| top limit=85 location
+=================
+
+
+
+
+
+
+
+
+ 
+
+

@@ -1,0 +1,245 @@
+https://github.com/splunk/botsv1
+--------------------
+Might be already done,if not refer botsv1_Work_part_1
+Download the dataset from this location: botsv1_data_set.tgz (6.1GB compressed)
+
+Alternatively, this collection represents a much smaller version of the original dataset containing only attack data. 
+In other words, "just the needles, no haystack." botsv1-attack-only.tgz(135MB compressed)
+
+We can upload this data to our splunk by either adding it as app 
+Apps>settings icon>Install app from file >choose file > botsv1_data_set.tgz or botsv1-attack-only.tgz
+
+Another option is to unzip and untar and copy the folder botsv1_data_set or botsv1-attack-only into 
+SPLUNK_HOME/etc/apps i.e. in windows:C:\Program Files\Splunk\etc\apps
+
+--restart splunk
+
+After uploading 'botsv1_data_set' app or 'botsv1-attack-only' app look under 'What to Search' which shows the 
+number of events.
+
+============================================
+Now..
+Note** I uploaded 'botsv1_data_set' .
+
+Clicking on data summary shows:
+Host and count (here count matches the number of events)
+number of events = xxxxxx
+
+Additionally click on options:
+Hosts(n)---ipaddresses/names etc
+Sources(n)--show more meaningful information
+SourceTypes(n)--shows different source types
+
+Querying:
+All data we would want to look into is in index="botsv1"
+
+Query:
+index="botsv1" or index=botsv1 earliest=0
+shows : 17,000,000+ events (without sampling)
+shows : 33,336 events (with sampling 1:1000)
+Note** earliest starts with earliest it has..
+
+Threat Hunting: A focused and iterative approach to searching out,identifying and understanding adversaries
+internal to defender's networks.
+Emphaisis on 'focused' and 'iterative'
+
+Assumptions come with Threat Hunting:
+-Attacker is on your network
+-Your detection tools failed
+
+Hunting vs IR(Incident Response)
+-In reactive organizations , an incident starts when notification comes in
+-In Hunting organizations, IR team actively goes looking for incidents based on known patterns of activity, intelligence,
+or even just hunches.Once Hunt team finds a new incident they begin an IR as usual.
+
+Threat Hunting process:
+Identify the problem > Gather Data > Make a hypothesis > Test the Hypothesis(experiment) > Does the new data agree
+Does the new data agree-Yes-experiment
+Does the new data agree-No-Make a hypothesis
+
+Example: Problem : Target-centric or actor-centric
+Hypothesis: "APT42" pwnd us by doing .......
+Experiment: "How do I investigate whether APT42 did ....?
+Pivot!"This host is clearly pwnd,now I have IOCs to investigate"
+
+Example: (Chris Handers - Threat hunting for HTTP user agents)
+Identify: Attackers frequently use HTTP to facilitate malicious network communication
+Hypothesis: If I find an unsual user agent string in HTTP traffic, I may have discovered an attacker
+Experiment: Aggregate and analyze the user agent field in all HTTP traffic for a specific time window.
+
+https://sqrrl.com/threat-hunting-http-user-agents/
+
+Summary: He did a reverse sort on user agents>d does analysis using "http://useragentstring.com/" > finds out why a useragent
+is wierd > finds relation between useragent and IP > finds domains and other activities related to that IP
+
+Using BOTsv1 for Threat Hunting:
+Start with a pipe and just use metadata
+Query:
+| metadata type=sourcetypes index=botsv1
+
+Shows 22 results
+firstTime	lastTime	recentTime	sourcetype	totalCount	type
+1470009975	1472428471	1473366069	wineventlog	5173	sourcetypes
+1470009600	1472428740	1473366071	wineventlog	14218920	sourcetypes
+1470009654	1472428629	1473366070	wineventlog	12226	sourcetypes
+1472055742	1472063262	1472063262	WinRegistry	74720	sourcetypes
+1470009602	1472428739	1473366114	xmlwineventlog	830389	sourcetypes
+1470009613	1472428700	1473366112	fgt_event	53422	sourcetypes
+1470009602	1472428740	1473366112	fgt_traffic	7675023	sourcetypes
+1470009624	1472428706	1473366112	fgt_utm	257477	sourcetypes
+1470863815	1472056633	1472056681	iis	22615	sourcetypes
+1472056400	1472056400	1472056477	nessus:scan	65	sourcetypes
+1470010447	1472428043	1473366082	stream:dhcp	3197	sourcetypes
+1470009601	1472428740	1473366082	stream:dns	1369998	sourcetypes
+1470009661	1472428498	1473366082	stream:http	39010	sourcetypes
+1470865509	1472062654	1472062655	stream:icmp	12858	sourcetypes
+1470009600	1472428740	1473366082	stream:ip	1435025	sourcetypes
+1470009603	1472428718	1473366082	stream:ldap	115625	sourcetypes
+1472056401	1472056677	1472056678	stream:mapi	7025	sourcetypes
+1472056458	1472056464	1472056464	stream:sip	12	sourcetypes
+1470009600	1472428732	1473366082	stream:smb	448008	sourcetypes
+1472056400	1472056431	1472056431	stream:snmp	12	sourcetypes
+1470009600	1472428740	1473366082	stream:tcp	1754601	sourcetypes
+1470031200	1472450339	1473366092	suricata	5078376	sourcetypes
+
+Query:
+#converting time in human readable
+| metadata type=sourcetypes index=botsv1 | convert ctime(firstTime) as firstTime | convert ctime(lastTime) as lastTime
+| convert ctime(recentTime) as recentTime
+
+Query:
+or using sources: (may give better granularity)
+| metadata type=sources index=botsv1 | convert ctime(firstTime) as firstTime | convert ctime(lastTime) as lastTime
+| convert ctime(recentTime) as recentTime
+
+Query:
+or using hosts:
+| metadata type=hosts index=botsv1 | convert ctime(firstTime) as firstTime | convert ctime(lastTime) as lastTime
+| convert ctime(recentTime) as recentTime
+
+sort by totalCount, look at the host ip
+#look for sourcetypes associated with that host
+Query:
+index=botsv1 host=192.168.250.1 | stats count by sourcetype
+
+Query:
+or better do it using
+| tstats count where index=botsv1 host=192.168.250.1 by sourcetype
+or
+| tstats count where index=botsv1 AND host=192.168.250.1 by sourcetype
+
+Query:
+index=botsv1 sourcetype=stream:dns | fieldsummary <all time>
+
+Query:
+index=botsv1 sourcetype=stream:dns | fieldsummary <data range: between 07/31/2016 and 08/28/2016>
+shows:
+
+field			count	distinct_count	is_exact	max	mean	min	numeric_count	stdev	values
+additional_answer_count	0	0		  1	 	 	 			0	 	[]
+answer	6278	104	0	 	 	 	0	 			[{"value":"191.232.139.214","count":2014},{"value":"191.232.139.213","count":1209},
+etc...
+
+Note**Splunk calculates these while search is happening
+Query:
+index=botsv1 sourcetype=stream:dns | fieldsummary | table field values
+
+#Let's focus on field query
+Query:
+index=botsv1 sourcetype=stream:dns record_type=A | stats count by query{} | sort count
+Note** sort will wait for search to complete,so it keeps changing result
+
+#query taken from splunk threat hunting blogs
+#this uses url toolkit which is one of apps to parse out a domain,so it breaks it into
+subdomain,domain without tld and filters out known domains as they are good
+#ut_shannon(ut_subdomain) --shannon entropy function --->triggers on long computer generated domain names
+
+Query:
+index=botsv1 sourcetype=stream:dns record_type=A 
+| table query{}
+| lookup ut_parse_extended_lookup url as query{}
+| search ut_domain!=None NOT (ut_domain_without_tld=micrsoft OR ut_domain_without_tld=msn
+   OR ut_domain_without_tld=akamaiedge OR ut_domain_without_tld=akadns OR ut_domain=nsatc.net
+   OR ut_domain=quest.net OR ut_domain=windows.com OR ut_domain=arin.net)
+| `ut_shannon(ut_subdomain)`
+| stats count by query{} ut_subdomain ut_domain ut_domain_without_tld ut_tld ut_shannon
+| sort - ut_shannon
+
+Let's pick up one of the from results:
+cerberhhyed5frqa.xmfir0.win
+
+Query:
+index=botsv1 sourcetype=stream:dns record_type=A query{}=cerberhhyed5frqa.xmfir0.win | table _time src dest query{} 
+Result:
+192.168.250.20---might be dns server
+192.168.250.100---might be host we are interested about
+
+Query: find whatever that host requested from dns on that day or later
+index=botsv1 sourcetype=stream:dns record_type=A src=192.168.250.100 earliest=08/24/2016:0:0:0 | table _time src dest query{}
+| dedup query{}
+
+
+Look at results under query for stuff which may look wierd
+#solidaritedeproximate.org--
+#shell.windows.com (windows looks for ,when we execute smthing for which windows doesn't have handler)
+#wpad(related to ipv6 tunneling, system which is looking for ipv6 tunnel/proxy)
+
+Query:
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" SourceIp="192.168.250.100" <date_range 08/26/2016 11:30:00 and 08/24/2016 13:30:00>
+
+Query:
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" SourceIp="192.168.250.100" | stats count by app
+#see if any app shows with high counts
+
+say --- xxxxxxbob.smith.WAYNECORPINCxxxxxxx
+
+Let's select the one which shows:
+WAYNECORPINC
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" SourceIp="192.168.250.100" app="C:\\Users\\bob.smith.WAYNECORPINC\\AppData\\Roaming*.exe"
+or
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" SourceIp="192.168.250.100" waynecorpinc
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" SourceIp="192.168.250.100" bob.smith
+
+
+Look at 'app' field > see how many apps 
+Now let's search any event based on app found
+Query:
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "121214.tmp" 
+AND (parentcommandline=* OR commandline=*)
+
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "121214.tmp" 
+AND (parentcommandline=* OR commandline=*) | table _time process process_id parent_process 
+parent_process_id Command_line ParentCommandLine
+
+Now let's look for last one
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "20429.vbs" 
+AND (parentcommandline=* OR commandline=*) | table _time
+ process process_id parent_process parent_process_id Command_line ParentCommandLine
+
+and this might show a wierd script/malware
+if the search shows MD5 we can check in google if it was known malware...
+
+
+useful blog:
+https://www.splunk.com/en_us/blog/security/hunting-with-splunk-the-basics.html
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

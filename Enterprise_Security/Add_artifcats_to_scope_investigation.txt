@@ -1,0 +1,14 @@
+Add artifacts to the scope of your investigation
+
+As part of your investigation on the workbench, you can add assets, identities, files, and URLs as artifacts to the scope of your investigation so that you can verify whether or not they are affected by, or participants in, the overall security incident.
+
+Add artifacts automatically from a notable event. 
+Add artifacts manually. 
+Add artifacts from a workbench panel. 
+Add artifacts from an event on the investigation. 
+
+
+For example, if you're investigating a malware outbreak at your organization, 
+you can add hosts to the scope that you suspect are infected with malware without adding the associated events to the timeline and recording them as verifiably compromised. 
+Add them to the scope first and review the relevant panels for additional context. 
+If you discover that an artifact is part of the security incident you are investigating, you can add the event or detail that revealed that insight to the investigation to record that information for later.

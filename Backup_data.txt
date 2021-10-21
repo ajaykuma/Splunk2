@@ -1,0 +1,21 @@
+Ongoing, incremental backups of warm data
+Backup of all data - for example, before upgrading the indexer
+
+To back up hot buckets as well, you need to take a snapshot of the files, using a tool like VSS (on Windows/NTFS), ZFS
+snapshots (on ZFS)
+
+If no tools:
+manually roll a hot bucket to warm and then back it up
+
+splunk _internal call /data/indexes/<index_name>/roll-hot-buckets ?auth <admin_username>:<admin_password>
+
+It is ordinarily not advisable to roll hot buckets manually, as each forced roll permanently decreases search
+performance over the data. As a general rule, larger buckets are more efficient to search. By prematurely rolling buckets,
+you're producing smaller, less efficient buckets.
+
+In Indexer cluster:
+create a script that goes through each
+peer's index storage and uses the bucket ID value contained in the bucket name to identify exactly one copy of each
+bucket. The bucket ID is the same for all copies of a bucket.
+
+

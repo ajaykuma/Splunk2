@@ -1,0 +1,18 @@
+Add threat intelligence
+
+Create threat artifacts in a threat collection.
+
+Click Add New Response Action and select Add Threat Intelligence.
+
+Select the Threat Group to attribute this artifact to.
+
+Select the Threat Collection to add the threat artifact to.
+
+Select the Field from event that contains the value to add as a threat artifact to the threat intelligence collection.
+
+Type a Description for the threat artifact.
+
+Type a Weight associated with the threat list. Defaults to 1.
+
+Type a number of Max Results to specify the number of results to process as threat artifacts. 
+Each unique search field value counts as a result. Defaults to 100.

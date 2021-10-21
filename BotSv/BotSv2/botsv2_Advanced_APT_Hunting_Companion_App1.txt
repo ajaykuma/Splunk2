@@ -1,0 +1,15 @@
+Advanced APT Hunting Companion App for Splunk
+-------------------------------------------
+download app from:
+https://splunkbase.splunk.com/app/4430/
+
+download data from 
+https://github.com/splunk/botsv2
+
+upload data in splunk
+-------------------
+
+launch apps and work on scenarios...
+
+
+

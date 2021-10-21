@@ -1,0 +1,211 @@
+#C:\Program Files\Splunk refered to winSplunk
+#$SPLUNK_HOME i.e. /usr/local/splunk refered to as linSplunk
+#Note**** change the paths accordingly (as per splunk instance OS) 
+
+#
+Create Index via splunk CLI:(in a non-indexer cluster)
+Navigate to the $SPLUNK_HOME/bin/ directory and use the add index command.
+
+#in windows
+winSplunk\bin>.\splunk add index LogIndex2
+Splunk username: admin
+Password:
+Index "LogIndex2" added.
+
+#in linux(provided ur bashrc was set correctly for your user which started splunk)
+--Login/be logged in with same user
+$splunk add index LogIndex2
+
+or
+cd linSplunk
+$bin/splunk add index LogIndex2
+
+======================================
+#using 'indexes.conf'
+
+#To enable indexes,add new stanza to indexes.conf in 
+linSplunk/etc/system/local
+or
+winSplunk\etc\system\local
+
+#before adding this to indexes.conf (if not exists create one), check if index exists by checking from web console : settings>indexes
+#note we are adding logindex too, which was created earlier using Web UI.
+#note** paths may have to be changed based on ur instance OS
+
+[logindex2]
+homePath=$SPLUNK_DB/logindex2/db
+coldPath=$SPLUNK_DB/logindex2/colddb
+thawedPath=$SPLUNK_DB/logindex2/thaweddb
+coldToFrozenDir=$SPLUNK_DB/logindex2/Archived
+
+[logindex]
+homePath=$SPLUNK_DB/logindex/db
+coldPath=$SPLUNK_DB/logindex/colddb
+thawedPath=$SPLUNK_DB/logindex/thaweddb
+coldToFrozenDir=$SPLUNK_DB/logindex/Archived
+
+<restart splunk>
+
+For storage optimization
+--Tsidx Retention Policy : disabled (specific note if enabled:refer relevant file in git)
+--configuring index storage: (specific note if choosen:refer relevant file in git)
+--for archiving : (specific note if choosen:refer relevant file in git)
+
+--check in windows
+winSplunk\etc\system\default
+winSplunk\etc\system\local
+or
+--check in linux
+linSplunk/etc/system/local
+linkSplunk/etc/system/default
+-------------------------------------------
+--Add data into newly created index
+#Let's add data to logindex
+webui>settings>add data > 
+upload 'syslog' file from 'https://github.com/ajaykuma/Datasets/tree/master/hadooprelatedlogs/application'
+sourcetype:syslog
+linebreaking: everyline
+time:auto
+index:logindex
+
+--check if data appears in your logindex from 'search'
+index="logindex"
+--there might be 38 events
+
+=========================================
+#Using 'inputs.conf'
+More with created index:
+
+#sending specific data to specific index
+Look at 'inputs.conf' in > winSplunk\etc\system\default
+and look at monitor stanzas.
+
+Or similarly in linux.
+
+To make changes edit 'inputs.conf'(if not exists,create one) in 
+winSplunk\etc\system\local
+
+#we want to monitor this path and send data to logindex2, you can choose a different path , thus update accordingly
+#monitor://<your path> for example monitor://$SPLUNK_HOME/...... or monitor:///var/log/vbox*
+
+
+[monitor://C:\Users\Win10\VirtualBox VMs\m1\Logs]
+disabled = false
+index = logindex2
+
+<restart splunk>
+--check if data now shows up in 'logindex2'
+===========================================
+#using 'props.conf' & 'transforms.conf' (if not existing,create them)
+
+#Route specific events to a different index
+#configure this on the indexer itself, not on the forwarder sending data to the indexer
+
+#edit props.conf and transforms.conf on the indexer:
+
+Look for 'props.conf' and 'transforms.conf' in windows> winSplunk\etc\system\default
+Look for 'props.conf' and 'transforms.conf' in linux> linSplunk/etc/system/default
+
+To make changes edit '*.conf' in 
+winSplunk\etc\system\local
+
+To route certain events to a specific index, edit props.conf and transforms.conf on the indexer:
+
+1. Identify a common attribute for the events that can be used to differentiate them.
+
+2. In props.conf, create a stanza for the source, source type, or host. 
+  This stanza specifies a transforms_name that corresponds to a regex-containing stanza you will create in transforms.conf.
+
+3. In transforms.conf, create an stanza named with the transforms_name you specified in step 2. This stanza:
+Specifies a regular expression that matches the identified attribute from step 1.
+Specifies the alternate index that events matching the attribute should be routed to.
+
+For example:
+Step1:
+Edit props.conf
+
+Add the following stanza to props.conf:
+
+[<spec>]
+TRANSFORMS-<class_name> = <transforms_name>
+
+Note the following:
+<spec> is one of the following:
+	<sourcetype>, the sourcetype of an event
+	host::<host>, where <host> is the host for an event
+	source::<source>, where <source> is the source for an event
+	<class_name> is any unique identifier.
+	<transforms_name> is whatever unique identifier you want to give to your transform in transforms.conf.
+
+Step2:
+Edit transforms.conf
+
+Add the following stanza to transforms.conf:
+
+[<transforms_name>]
+REGEX = <your_custom_regex>
+DEST_KEY = _MetaData:Index
+FORMAT = <alternate_index_name>
+Note the following:
+
+	<transforms_name> must match the <transforms_name> identifier you specified in props.conf.
+	<your_custom_regex> must provide a match for the attribute you identified earlier, in step 1.
+	DEST_KEY must be set to the index attribute _MetaData:Index.
+	<alternate_index_name> specifies the alternate index that the events will route to.'
+
+#first add data to your logindex2 from
+https://github.com/ajaykuma/Datasets/tree/master/vmboxlogs
+
+#either via the webui>settings>data inputs>File & Directories > +Add New > File & Directories > <path of folder downloaded> > Continously Monitor
+#or
+#use inputs.conf way suggested above to monitor this path
+
+#Then edit:
+
+props.conf
+[VBox]
+TRANSFORMS-index = MsgsRedirect
+
+#we want to search events which might be in logindex2/coming into logindex2 and have 'Guest Control' in them to be sent to logindex
+
+transforms.conf
+[MsgsRedirect]
+REGEX = Guest\s+Control
+DEST_KEY = _MetaData:Index
+FORMAT = logindex
+
+<restart splunk>
+==========================
+Create metrics indexes
+Using CLI:
+For example, to create an index called mymetricsdata, enter the following command:
+
+splunk add index mymetricsdata -datatype metric
+To list all metrics indexes, enter the following command:
+
+splunk list index -datatype metric
+To list all indexes, including events indexes, enter the following command:
+
+splunk list index -datatype all
+
+Using Rest API:
+For example, to create a metrics index called mymetricsindex, enter the following command:
+
+curl -k -u admin:pass https://localhost:8089/services/data/indexes  \
+    -d name=mymetricsindex                                          \
+    -d datatype=metric
+To list all metrics indexes using the REST API, enter the following command:
+
+curl -k -u admin:pass https://localhost:8089/services/data/indexes?datatype=metric
+To list all indexes, including events indexes, enter the following command:
+
+curl -k -u admin:pass https://localhost:8089/services/data/indexes?datatype=all
+
+
+
+
+
+
+
+
+

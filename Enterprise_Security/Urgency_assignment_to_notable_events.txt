@@ -1,0 +1,50 @@
+If event severity is informational, the event urgency is informational, regardless of asset priority.
+
+If asset priority is unknown or low and event severity is unknown, low, or medium, the event urgency is low.
+
+If asset priority is unknown or low and event severity is high, the event urgency is medium.
+
+If asset priority is unknown or low and event severity is critical, the event urgency is high.
+
+If asset priority is unknown or low and event severity is critical, the event urgency is high.
+
+If asset priority is medium and event severity is unknown or low, the event urgency is low.
+
+If asset priority is medium and event severity is medium, the event urgency is medium.
+
+If asset priority is medium and event severity is high, the event urgency is high.
+
+If asset priority is medium and event severity is critical, the event urgency is critical.
+
+If asset priority is high and event severity is unknown, low, or medium, the event urgency is medium.
+
+If asset priority is medium and event severity is high, the event urgency is high.
+
+If asset priority is medium and event severity is critical, the event urgency is critical.
+
+
+If asset priority is critical and event severity is unknown or low, the event urgency is medium.
+
+If asset priority is critical and event severity is medium, the event urgency is high.
+
+
+If asset priority is critical and event severity is high or critical, the event urgency is critical.
+
+When calculating the severity level, a notable event displays a default of "low" urgency when an asset or identity 
+is categorized as "unknown." The "unknown" classification typically represents an object that has no match in the asset 
+and identities system.
+
+A notable event can be assigned an "unknown" urgency level if the priority value from the asset and identity lookups 
+or the severity value assigned by the correlation search or in a triggering event is not recognized by Enterprise Security. 
+
+Verify that the correlation search severity is unknown, informational, low, medium, high, or critical. Verify that
+ the asset or identity priority is unknown, low, medium, high, or critical.
+
+Incident Review filters on the urgencies of "high", "medium", "low", "critical", "informational", or "unknown."
+ Any value that is not one of the filtered urgencies also defaults to "unknown". This ensures that all notable 
+events are displayed in Incident Review.
+
+
+
+
+

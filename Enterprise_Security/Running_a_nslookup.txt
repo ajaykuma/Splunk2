@@ -1,0 +1,12 @@
+Run nslookup
+
+
+Look up the domain name of an IP address, or the IP address of a domain name, by running nslookup. 
+You must have nslookup installed on the search head for this to run.
+
+Click Add New Response Action and select Nslookup.
+
+Select the field that contains the host that you want to run the nslookup for in the Host Field.
+
+Type the number of maximum results that the nslookup returns. Defaults to 1.
+

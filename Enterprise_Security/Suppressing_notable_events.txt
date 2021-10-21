@@ -1,0 +1,24 @@
+Suppressing a notable event
+Hide notable events from the Incident Review dashboard by suppressing them. 
+Creating a notable event suppression does not change the counts of notable events 
+on the posture or auditing dashboards. 
+
+
+Select a notable event on the Incident Review dashboard.
+From the Actions menu, select Suppress Notable Events.
+Type a Suppression Name.
+
+(Optional) Provide a reason for the suppression using the Description field.
+
+(Optional) Set a date range. After the time limit ends, the suppression filter expires and stops hiding events.
+
+Review the Selected Fields to validate the fields that you want to suppress notable events from. For example, the src field
+
+(Optional) Click change to modify the notable event fields used for the suppression.
+
+Save changes
+
+
+
+
+

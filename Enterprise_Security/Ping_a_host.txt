@@ -1,0 +1,18 @@
+Ping a host
+
+Determine whether a host is still active on the network by pinging the host.
+
+Click Add New Response Action and select Ping.
+
+Select the field that contains the host that you want to ping in the Host Field.
+
+Type the number of maximum results that the ping returns. Defaults to 1.
+
+Run nbtstat
+Learn more about a host and the services that the host runs by running nbtstat. You must have nbtstat installed on the search head for this to run successfully.
+
+Click Add New Response Action and select Nbtstat.
+
+Select the field that contains the host that you want to run the nbtstat for in the Host Field.
+
+Type the number of maximum results that the nbtstat returns. Defaults to 1.

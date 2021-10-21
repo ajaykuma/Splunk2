@@ -1,0 +1,81 @@
+From the ES menu bar, select Investigations.
+
+Open an investigation to view the workbench for that investigation.
+
+On the Artifacts panel, click Add Artifact.To add one artifact, use the default Add artifact tab:
+For Artifact, type the value of the artifact.
+
+For Type, select the type of the artifact: Identity, Asset, File, or URL.The file artifact is a filename, file hash, 
+or file path.
+
+(Optional) Type a description.For example, Personal computer infected by ransomware.
+
+(Optional) Type one or more labels to contextualize the entity. Press enter to add a label, or use a comma-separated 
+entry for multiple labels.For example, ransomware, laptop, mac.
+
+(Optional) Click Expand Artifacts to look up the asset or identity in the asset or identity lookups and add the 
+correlated artifacts to the investigation scope.
+
+To add multiple artifacts:Select the Add multiple artifacts tab.
+
+Select the Type: Identity, Asset, File or URL. All artifacts that you add must be the same type.The file artifact 
+is a filename, file hash, or file path.
+
+You can use a comma or a line break as a delimiter. Select a Separator that delimits the list of assets or identities.
+
+Type or paste the values for the assets or identities, using the separator specified in the previous step.
+
+(Optional) Type a description to apply to all artifacts that you are adding.For example, Potentially-infected 
+computers in the HR department.
+
+(Optional) Type one or more labels to apply to all artifacts that you are adding. Press enter to add a label, 
+or use a comma-separated entry for multiple labels.For example, ransomware, laptop, mac.
+
+Click Add to Scope to add the artifacts to your investigation scope.
+The artifacts that you add to your investigation scope manually are automatically selected so that you can click Explore
+ and continue your investigation with the new artifacts.
+
+----------------------
+How to Add artifacts from a workbench panel
+
+If a workbench panel has drilldown enabled, you can add field values as artifacts from the panel.
+
+Open the investigation and view the workbench.
+
+Select artifacts and click Explore.
+
+In a panel, click a field value.The Add Artifact dialog box appears with the value already added.
+
+Select a Type for the artifact. Some types, such as IP addresses, are automatically detected.
+
+(Optional) Add a description for the artifact.
+
+(Optional) Add labels for the artifact.
+
+(Optional) Click Expand Artifacts to look up the asset or identity in the asset or identity lookups and add the correlated artifacts to the investigation scope.
+
+Click Add to Scope to add the artifact to your investigation scope.
+
+-----------------------------------
+How to Add artifacts from a raw event on the investigation
+
+After you add an event to the investigation, you can add field values from the event as artifacts to your investigation scope.
+
+Open the investigation and view the Timeline of the investigation.
+
+Locate the event in the Slide View.
+
+Click Details to view a table of fields and values in the event.
+
+Click the value that you want to add to the investigation scope.The Add Artifact dialog box appears with the value already added.
+
+Select a Type for the artifact. Some types, such as IP addresses, are automatically detected.
+
+(Optional) Add a description for the artifact.
+
+(Optional) Add labels for the artifact.
+
+(Optional) Click Expand Artifacts to look up the asset or identity in the asset or identity lookups and add the correlated artifacts to the investigation scope.
+
+Click Add to Scope.
+

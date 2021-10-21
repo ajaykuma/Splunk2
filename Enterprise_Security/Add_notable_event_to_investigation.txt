@@ -1,0 +1,14 @@
+Adding a notable event to an investigation
+
+Investigate notable events that could be a part of a security incident by adding them to an investigation.
+
+Add a notable event to an existing investigation
+
+Add one or more notable events to an investigation. 
+Add a single notable event by selecting Add Event to Investigation from the Event Actions.
+Add multiple notable events by selecting the check boxes next to the notable events and click Add Selected to Investigation.
+Select an investigation to add the notable events to. If you selected an investigation in the investigation bar, that investigation is selected by default.
+
+Click Save.
+After the event or events are successfully added to the investigation, click Close.
+

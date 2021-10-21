@@ -1,0 +1,55 @@
+index="botsv1" | bin _time span=7d | stats avg(flow.bytes_toserver) as value by _time,flow.bytes_toserver
+| table _time,flow.bytes_toserver
+
+--------
+index="botsv1" | bin _time span=7d | stats avg(flow.bytes_toserver) as value by _time,flow.bytes_toserver,host
+| table _time,flow.bytes_toserver,host,dest
+|  sort flow.bytes_toserver desc
+
+index="botsv1" | bin _time span=7d | stats max(flow.bytes_toserver) as value by _time,flow.bytes_toserver,host
+| table _time,flow.bytes_toserver,host,dest
+| eval dimensions="flow.bytes_toserver,host,dest"
+
+---------------
+index="botsv1" | eval time = strftime(_time, "%Y-%m-%dT%H:%M:%S%z") 
+| bin time span=7d | stats max(flow.bytes_toserver) as value by _time,flow.bytes_toserver,host
+| table time,flow.bytes_toserver,host,dest
+| eval dimensions="flow.bytes_toserver,host,dest"
+
+-----------------
+index="botsv1" | eval time = strftime(_time, "%Y-%m-%dT%H:%M:%S%z") 
+| bin time span=7d | stats max(flow.bytes_toserver) as value by time,flow.bytes_toserver,host
+| table time,flow.bytes_toserver,host,dest
+| eval dimensions="flow.bytes_toserver,host,dest" 
+| collect index=normalized sourcetype=transactions_normalize
+
+------------------
+#for deduplication in case of multiple collects of data
+
+index="botsv1" | eval time = strftime(_time, "%Y-%m-%dT%H:%M:%S%z") 
+| bin time span=7d | stats max(flow.bytes_toserver) as value by time,flow.bytes_toserver,host
+| table time,flow.bytes_toserver,host,dest
+| eval dimensions="flow.bytes_toserver,host,dest" 
+| collect index=normalized sourcetype=transactions_normalize 
+| eval time=_indextime 
+| stats latest(value) as value by time,flow.bytes_toserver,dims
+-----------------
+index="botsv1" sourcetype=wineventlog
+| eval "metric_name:wineventlog.bytes_out" = bytes_out,"metric_name:wineventlog.dest_ip" = dest_ip,
+         "metric_name:wineventlog.event_type" = event_type
+         | mcollect index=eventInfo
+
+-----------------------
+index="botsv1" | stats count by sourcetype | sort 5 -count | eval count=tostring('count',"commas")
+
+stats:
+index="botsv1" | stats count by sourcetype | sort 5 -count | eval count=tostring('count',"commas")
+
+tstats:
+|tstats count where index="botsv1" by sourcetype | sort 5 -count | eval count=tostring('count',"commas")
+
+index="botsv1" sourcetype="xmlwineventlog" | eventstats first(DestinationIp) as fdi by source | where dvc="we1149srv.waynecorpinc.local" | table _time,dvc,fdi
+
+-------------------
+
+

@@ -1,0 +1,151 @@
+#refer:18-Configuring Indexer Cluster.txt in Working folder
+-------------------------
+--Create a indexes.conf file on master node
+
+[logindex3]
+repFactor = auto
+homePath = $SPLUNK_DB/$_index_name/db
+coldPath = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/$_index_name/Archived
+
+#By default, repFactor is set to 0, which means that the index will not be replicated. 
+For clustered indexes, you must set it to "auto".
+(The only valid values for repFactor are 0 and "auto")
+Resetting repFactor from "auto" to 0 will stop further replication, but it will not automatically 
+remove copies of already replicated buckets. 
+In addition, searches across buckets with multiple copies will return duplicate events. 
+To free up associated disk space and eliminate the possibility of duplicate events, 
+you must remove the excess copies manually.
+
+#if different OS use forward slashes anyways
+homePath = $SPLUNK_DB/$_index_name/db
+Splunk Enterprise always accepts the forward slash as a directory separator.
+
+#After you edit indexes.conf, you need to distribute it to the cluster's set of peer nodes.
+#configuration bundle method will be used.
+-------------------------------------------------
+#Looking at configuration bundle :
+$SPLUNK_HOME/etc/master-apps/
+     _cluster/
+          default/
+          local/
+     <app-name>/
+     <app-name>/
+     
+The /_cluster directory is a special location for configuration files that need to be distributed across all peers:
+The /_cluster/default subdirectory contains a default version of indexes.conf. 
+Note***Do not add any files to this directory and do not change any files in it. 
+This peer-specific default indexes.conf has a higher precedence than the standard default indexes.conf,
+located under $SPLUNK_HOME/etc/system/default.
+
+The /_cluster/local subdirectory is where you can put new or edited configuration files that you want to distribute
+to the peers.
+
+The /<app-name> subdirectories are optional. They provide a way to distribute any app to the peer nodes. 
+Create and populate them as needed. For example, to distribute "appExample" to the peer nodes, place a copy 
+of that app in its own subdirectory: $SPLUNK_HOME/etc/master-apps/appExample.
+
+To delete an app that you previously distributed to the peers, remove its directory from the configuration bundle. 
+When you next push the bundle, the app will be deleted from each peer.
+
+The master only pushes the contents of subdirectories under master-apps. 
+It will not push any standalone files directly under master-apps. 
+
+Note**The master-apps location is only for peer node files. 
+The master does not use the files in that directory for its own configuration needs.
+
+#on Peer nodes:
+#directory is created soon after a peer is enabled, when the peer initially gets the latest bundle from the master
+$SPLUNK_HOME/etc/slave-apps/
+     _cluster/
+          default/
+          local/
+     <app-name>/
+     <app-name>/
+
+Directory on the peers is read-only. This is necessary and beneficial behavior, because each time you distribute 
+a new bundle, the directory gets overwritten in its entirety. 
+
+--------------------------------------------
+#To distribute
+2. Place the files in the $SPLUNK_HOME/etc/master-apps directory on the master. 
+   The set of subdirectories in this location constitute the configuration bundle.
+
+--place ur indexes.conf in this location $SPLUNK_HOME/etc/master-apps/_cluster/local
+--make sure you DONT place/replace $SPLUNK_HOME/etc/master-apps/_cluster/default
+--make sure its not placed on any peer indexer
+--(Optional) Validate the bundle and check restart
+[[To validate the bundle and check restart:
+
+On the master node, in Splunk Web, click Settings > Indexer Clustering.
+The Master Node dashboard opens.
+Click Edit > Configuration Bundle Actions.
+Click Validate and Check Restart > Validate and Check Restart.
+A message appears that indicates bundle validation and check restart success or failure.]]
+
+--use configuration bundle method to distribute or command line options
+On the master, in Splunk Web, click Settings > Indexer clustering.
+The Master Node dashboard appears.
+Click Edit > Configuration Bundle Actions.
+
+----------------------------------------------
+CLI:
+#to validate
+splunk validate cluster-bundle
+
+#to validte and check if restart is required
+splunk validate cluster-bundle --check-restart
+
+#check status
+splunk show cluster-bundle-status
+
+Applying bundle
+splunk apply cluster-bundle
+or
+splunk apply cluster-bundle --answer-yes
+
+Note**The splunk apply cluster-bundle command 
+causes the master to distribute the new configuration bundle to the peers, which then individually validate the bundle.
+ During this process, each peer validates the settings for all indexes.conf files in the bundle. After all peers 
+successfully validate the bundle, the master coordinates a rolling restart of all the peer nodes, if necessary.
+
+#while pushing..
+splunk show cluster-bundle-status
+
+# You can set searchable rolling restart in server.conf as 
+the default mode for all rolling restarts triggered by a configuration bundle push.
+
+
+RollBack
+#can rollback the configuration bundle to the previous version. 
+#The rollback action always toggles the two most recent bundles.
+On the master, in Splunk Web, click Settings > Indexer Clustering.
+The Master Node dashboard opens.
+Click Edit > Configuration Bundle Actions.
+Click Rollback.
+
+CLI
+splunk rollback cluster-bundle
+
+
+================
+For additional info on indexes:
+Install on search head
+https://splunkbase.splunk.com/app/1632/#/details
+
+Install on indexers (follow configuration management bundle option as described above)
+
+Technology Add-on for Fire Brigade version 2
+https://splunkbase.splunk.com/app/1633/
+
+
+
+
+
+
+
+
+
+
+

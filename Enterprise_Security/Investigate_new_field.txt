@@ -1,0 +1,17 @@
+Investigate a field in more detail
+
+Take action on a specific field, such as host, src, src_ip, dest or dest_ip
+Different actions are available to take depending on the field you select.
+
+Tag fields by selecting Edit tags.
+
+Investigate an asset by selecting Asset Investigator to open the Asset Investigator dashboard filtered on the asset.
+
+Search for access-related events for a specific destination IP address by selecting Access Search (as destination).
+
+Investigate a domain by selecting Domain Dossier.
+
+Find other notable events with matching malware signatures by selecting Notable Event Search.
+
+Use the embedded workbench to get more context about specific field values.
+

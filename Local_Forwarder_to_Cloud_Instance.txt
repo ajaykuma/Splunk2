@@ -1,0 +1,148 @@
+refer link:https://docs.splunk.com/Documentation/SplunkCloud/8.0.2007/Admin/UnixGDI
+#Sending data from Local forwarder to your Splunk Cloud Instance
+--start splunk forwarder
+
+ufwrd@n1:~$ ls -all /usr/local/splunkforwarder/
+total 180
+drwxr-xr-x  9 ufwrd ufwrd  4096 Sep 26 15:03 .
+drwxr-xr-x 14 root  root   4096 Sep 25 21:05 ..
+drwxr-xr-x  3 ufwrd ufwrd  4096 Aug 27 10:10 bin
+-r--r--r--  1 ufwrd ufwrd    57 Aug 27 09:47 copyright.txt
+drwxr-xr-x 13 ufwrd ufwrd  4096 Sep 25 21:50 etc
+drwxr-xr-x  2 ufwrd ufwrd  4096 Aug 27 10:08 include
+drwxr-xr-x  5 ufwrd ufwrd  4096 Aug 27 10:10 lib
+-r--r--r--  1 ufwrd ufwrd 85709 Aug 27 09:47 license-eula.txt
+drwxr-xr-x  3 ufwrd ufwrd  4096 Aug 27 10:08 openssl
+-r--r--r--  1 ufwrd ufwrd   843 Aug 27 09:50 README-splunk.txt
+drwxr-xr-x  4 ufwrd ufwrd  4096 Aug 27 10:08 share
+-r--r--r--  1 ufwrd ufwrd 50969 Aug 27 10:11 splunkforwarder-8.0.6-152fb4b2bb96-linux-2.6-x86_64-manifest
+drwx--x---  6 ufwrd ufwrd  4096 Sep 25 21:06 var
+
+ufwrd@n1:~$ ls -all /usr/local/splunkforwarder/var
+total 24
+drwx--x--- 6 ufwrd ufwrd 4096 Sep 25 21:06 .
+drwxr-xr-x 9 ufwrd ufwrd 4096 Sep 26 15:03 ..
+drwx--x--- 3 ufwrd ufwrd 4096 Sep 25 21:06 lib
+drwx--x--- 5 ufwrd ufwrd 4096 Sep 25 21:06 log
+drwx--x--- 3 ufwrd ufwrd 4096 Sep 25 21:06 run
+drwx--x--- 4 ufwrd ufwrd 4096 Sep 25 21:06 spool
+
+ufwrd@n1:~$ ls -all /usr/local/splunkforwarder/var/log
+total 20
+drwx--x--- 5 ufwrd ufwrd 4096 Sep 25 21:06 .
+drwx--x--- 6 ufwrd ufwrd 4096 Sep 25 21:06 ..
+drwx------ 2 ufwrd ufwrd 4096 Sep 25 21:06 introspection
+drwx------ 2 ufwrd ufwrd 4096 Sep 25 21:08 splunk
+drwx------ 2 ufwrd ufwrd 4096 Sep 25 21:06 watchdog
+
+ufwrd@n1:~$ ls -all /usr/local/splunkforwarder/var/log/splunk/
+total 2460
+drwx------ 2 ufwrd ufwrd    4096 Sep 25 21:08 .
+drwx--x--- 5 ufwrd ufwrd    4096 Sep 25 21:06 ..
+-rw------- 1 ufwrd ufwrd  106872 Sep 26 15:13 audit.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 btool.log
+-rw------- 1 ufwrd ufwrd    1364 Sep 26 15:03 conf.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 dfm_stderr.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 dfm_stdout.log
+-rw------- 1 ufwrd ufwrd      70 Sep 25 21:06 first_install.log
+-rw------- 1 ufwrd ufwrd    1255 Sep 25 22:06 health.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 license_usage.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 license_usage_summary.log
+-rw------- 1 ufwrd ufwrd 1936005 Sep 26 15:17 metrics.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 mongod.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 remote_searches.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 scheduler.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 searchhistory.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 search_messages.log
+-rw------- 1 ufwrd ufwrd   49244 Sep 26 15:18 splunkd_access.log
+-rw------- 1 ufwrd ufwrd  374097 Sep 26 15:17 splunkd.log
+-rw------- 1 ufwrd ufwrd     466 Sep 26 15:03 splunkd_stderr.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 splunkd_stdout.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 splunkd_ui_access.log
+-rw------- 1 ufwrd ufwrd    4920 Sep 26 15:03 splunkd-utility.log
+-rw------- 1 ufwrd ufwrd       0 Sep 25 21:06 splunk_instrumentation_cloud.log
+
+ufwrd@n1:~$ splunk start
+
+Splunk> The Notorious B.I.G. D.A.T.A.
+
+Checking prerequisites...
+	Checking mgmt port [8089]: open
+	Checking conf files for problems...
+	Done
+	Checking default conf files for edits...
+	Validating installed files against hashes from '/usr/local/splunkforwarder/splunkforwarder-8.0.6-152fb4b2bb96-linux-2.6-x86_64-manifest'
+	All installed files intact.
+	Done
+All preliminary checks passed.
+
+Starting splunk server daemon (splunkd)...  
+Done
+
+ufwrd@n1:~$ splunk status
+splunkd is running (PID: 23063).
+splunk helpers are running (PIDs: 23064).
+
+--login into your splunk cloud instance and click on forwarder app and download your credentials
+--once downloaded it shows
+ufwrd@n1:~$ ls /home/hdu/Downloads/splunkclouduf.spl 
+/home/hdu/Downloads/splunkclouduf.spl
+
+--install app
+ufwrd@n1:~$ splunk install app /home/hdu/Downloads/splunkclouduf.spl
+App "100_prd-p-bsqgd_splunkcloud" already exists; use the "update" argument to install anyway
+--in my case app already installed
+
+--Go to Splunkbase, and download the Splunk Add-on for Unix and Linux.
+--https://splunkbase.splunk.com/app/833/
+
+ufwrd@n1:~$ ls /home/hdu/Downloads/splunk-add-on-for-unix-and-linux_820.tgz 
+/home/hdu/Downloads/splunk-add-on-for-unix-and-linux_820.tgz
+
+--untar splunk-add-on-for-unix-and-linux_820.tgz in download location 
+tar -xvf splunk-add-on-for-unix-and-linux_820.tgz
+
+--should now create a directory
+ls /home/hdu/Downloads/Splunk_TA_nix/
+app.manifest  appserver  bin  default  license-eula.rtf  license-eula.txt  lookups  metadata  README  README.txt  static
+
+--Ensure that you are logged in as the splunk user. You can verify this using the whoami command.
+--Move the Splunk_TA_nix directory to splunkforwarder
+mv /home/hdu/Downloads/Splunk_TA_nix/ /usr/local/splunkforwarder/etc/apps/
+--Go to the apps directory by entering the following command: 
+cd /usr/local/splunkforwarder/etc/apps 
+--check ur directory exists
+--Go to the Splunk_TA_nix directory 
+cd Splunk_TA_nix 
+--Create a local directory. 
+mkdir local 
+--You can verify that the directory was created by entering: ls -F .
+--Now, copy the inputs.conf file from the default directory to your local directory by entering the following command
+cp default/inputs.conf local.
+--Go to your local directory by entering 
+cd local
+--Now you'll need to open the file using your preferred text editor and edit to replace all 'disabled = 1' to 'disabled = 0'
+vi inputs.conf.
+--When you open the file for editing, you can see the inputs related to the *nix operating system. 
+--Note that each of the inputs is disabled and each input displays as disabled = 1.
+--This enables the inputs. 
+--You may later decide to disable some of these inputs when you become more familiar with them.
+
+linux command to replace all
+esc + :%s/disabled = 1/disabled = 0/g
+    
+--verify if changed
+--save the file
+esc + shift + :wq
+
+Lastly, restart your forwarder to enable the changes. 
+
+splunk restart
+
+--check in cloud instance
+--in search
+index="main"
+
+that should show u data coming from ur universal forwarder instance
+
+

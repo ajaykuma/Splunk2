@@ -1,0 +1,14 @@
+Subsearch
+------------
+--must be enclosed in square brackets in the primary search
+--must have a command after the pipe and before the subsearch
+--when a search contains subsearch, subsearch is run first
+--first command in subsearch miust be generating command, such as search , eventcount, inputlookup and tstats
+--time ranges specified in outersearch ,do not apply to subsearch and visa versa.
+
+
+--paramterize one search using output of another search
+--run a separate search and add the output to the first search using append command
+--used with commands such as join,append,appendcols,foreach etc..
+
+

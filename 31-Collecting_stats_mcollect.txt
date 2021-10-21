@@ -1,0 +1,38 @@
+mcollect and mstats
+---------------
+
+mcollect : converts events into metric data during search time and inserts in metric index.
+https://docs.splunk.com/Documentation/Splunk/8.0.5/SearchReference/Mcollect
+
+
+example:
+index=xxxxx sourcetype=xxxxx group=xxxx
+| eval "metric_name:pipeline.cpu_seconds" = cpu_seconds,
+       "metric_name:pipeline.executes" = executes,
+       "metric_name:pipeline.cumulative_hits" = cumulative_hits,
+| mcollect index=urnamedindx
+
+Looking at dimensions
+|mcatalog values(_dims) where index=urnamedindex
+
+index=xxxxx sourcetype=xxxxx group=xxxx
+| eval "metric_name:pipeline.cpu_seconds" = cpu_seconds,
+       "metric_name:pipeline.executes" = executes,
+       "metric_name:pipeline.cumulative_hits" = cumulative_hits,
+| mcollect index=urnamedindx split=true field1,field2,field3 prefix_field=group
+
+| mstats  count(*) where index=urnamedindx span=1d BY metric_name
+
+
+
+=============
+statsd
+tstat
+
+
+
+
+
+
+
+

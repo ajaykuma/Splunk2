@@ -1,0 +1,18 @@
+Add a notable event to a new investigation
+
+Select one or several notable events and click Add Selected to Investigation.
+
+Click Create Investigation to start a new investigation.
+
+Type a title for the investigation.
+
+(Optional) Change the default status.
+
+(Optional) Type a description.
+
+Click Save to save the investigation and add the notable event or notable events to the investigation. 
+Clicking Cancel does not add the selected notable events, but the new investigation is still created. 
+You can click Start Investigation to add the notable events to the investigation and open the investigation.
+
+After the event or events are successfully added to the investigation, 
+click Close or click Open <Investigation name> to open the investigation.

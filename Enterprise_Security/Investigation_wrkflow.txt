@@ -1,0 +1,41 @@
+Example investigation workflow
+
+You are notified of a security incident that needs investigation through a notable event, an alert action, or 
+an email, ticket from the help desk, or a phone call.
+
+Create an investigation in Splunk Enterprise Security.
+
+Add colleagues to the investigation as collaborators.
+
+Open the investigation and start investigating on the workbench.
+
+Add artifacts to the investigation scope, in addition to those added automatically from notable events.
+
+Review the tabs and panels for information relevant to your investigation, such as additional affected assets 
+or details about the affected assets that can accelerate your investigation.
+
+7. As you investigate, add helpful or insightful events, actions, and artifacts to the investigation to record 
+the steps you took in your investigation. 
+
+         a)  Run searches, adding useful searches to the investigation from your action history with      	
+the investigation bar or relevant events using event actions. This makes it easy to 	
+replicate your work for future, similar investigations, and to make a comprehensive 	
+record of your investigation process.
+
+         b)	Filter dashboards to focus on specific elements, like narrowing down a swim lane
+ 	search to focus on a specific asset or identity on the asset or identity investigator
+ 	dashboards. Add insightful filtering actions from your action history to the investigation
+ 	using the investigation bar.
+
+         c)	Triage and investigate potentially-related notable events. Add relevant notable events
+ 	to the investigation.
+
+         d)	Add notes to record other investigation steps, such as notes from a phone call, email or 
+	chat conversations, links to press coverage or social media posts. Upload files like
+ 	screenshots or forensic investigation files.
+8. Complete the investigation and close the investigation and optionally, close associated notable events.
+
+9. Review the investigation summary and share it with others as needed.
+
+
+

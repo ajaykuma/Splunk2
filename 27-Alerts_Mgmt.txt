@@ -1,0 +1,28 @@
+Alerting:
+--Scheduled Search
+--Continued monitoring
+Alert type: How often do you want to check the events:
+Alert triggering condition and throttling
+[once once for each result Per result Rolling window]
+Alert Action
+-------------------
+Alerts are saved searches>saved under(depending on permission)
+splunk_home/etc/users/admin/search/local > savedsearches.conf
+refer: https://crontab.guru/ for scheduling help.
+
+or
+splunk_home/etc/apps/search/local > savedsearches.conf
+
+
+look in trigger Alerts for alerts saved.
+
+try creating an alert..
+
+--sample query:
+index=_internal " error " NOT debug source=*splunkd.log* earliest=-5m latest=now
+| rex "mail\s+to:\s+(?<mail_id>.+@test.com)*
+
+Throttling: use the field created using the regex above..
+choose: suppress triggering and provide 'Suppress results containing field value' <say : mail_id>
+
+

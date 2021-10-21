@@ -1,0 +1,32 @@
+Set up artifact extraction for notable events (Automatically)
+
+You can define the fields that are automatically extracted as identities or assets on the workbench when a notable event is added to an investigation. 
+
+By default, the same fields that are used for asset and identity correlation are the fields extracted from the notable events created by included correlation searches. You must add fields to be extracted for any custom correlation searches.
+
+When artifacts are extracted, duplicates are not created if they already exist in the investigation. You will see a notification that "the following artifacts already exist and have not been added." 
+
+The existing artifact is not linked against the new notable event that would have caused the duplicate artifact to be created. 
+
+This does not prevent you from manually adding a duplicate artifact.
+---------------
+If your correlation search does not use data models, or the search results contain different fields that you want to extract, you can specify the fields to extract into the investigation scope.
+Select Configure > Content > Content Management.
+
+Click the correlation search that you want to customize to open it for editing.
+
+Select the notable event adaptive response action.
+
+For Asset Extraction, type a field name from the correlation search results that identifies an asset. Press Enter to add the field name.
+
+For Identity Extraction, type a field name from the correlation search results that identifies an identity. Press Enter to add the field name.
+
+Click Save.
+
+For File Extraction, type a field name from the correlation search results that identifies a file. Press Enter to add the field name.
+
+Click Save.
+
+For URL Extraction, type a field name from the correlation search results that identifies a URL. Press Enter to add the field name.
+Click Save.
+

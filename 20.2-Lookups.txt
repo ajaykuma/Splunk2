@@ -1,0 +1,243 @@
+Lookups
+-----------
+Lookups are used to store configuration files
+--CSV lookups 
+(for static and limited amt of data & data might 
+not be updated frequently,good for structured data)
+--KV store lookups 
+(when we want to store hige volume of data, 
+allows you to update records one by one,
+provides APIs to update or doing other things with 
+lookup,allows data acceleration for faster access)
+--Scripted lookups (writing scripts)
+--Geospatial lookups 
+(used to get events based on 
+geospatial data)
+
+----------------
+For every lookup 
+--lookup files (optional: for KV store & scripted lookups we dont need this)
+--lookup definition (important for all)
+
+Common commands when working with lookups
+1. inputlookup
+2. outputlookup
+3. lookup
+
+==============================
+##KV Store lookups (usually works on collection file)
+--we need collections.conf
+
+[tmdb_kvstore]<---stanza showing collection name
+enforceTypes = false <---we r not enforcing any datatype
+field.id = string  <---supported datatypes are number,bool,string & time.
+field.name = string
+accelerated_fields.my_accl = {"id": 1} <---these fields have a limitation of 1024 bytes per entry
+
+Note** Lookup configurations can reference fields that are added to events by field extractions, field aliases & 
+calculated fields . They cannot reference event types and tags.
+
+Working with KV store lookup:
+(for kv store lookup we just need definitions and not files)
+
+--create collections.conf file and place it in /etc/apps/tmdb_new1/default/
+--settings > lookups > lookup definitions
+Destination_app:tmdb_new1
+Name: kvstore_lookup
+Type:Kv store
+collection name: tmdb_kvstore (<----same as given in collections.conf)
+Supported fields: id,name > save
+
+--check if lookup was created.
+--change permissions and map it to your app
+--check if you can access lookup
+search > | inputlookup kvstore_lookup
+(nothing shows up)
+
+--we can populate data using API/outputlookup
+
+Note** Here index 'tmdb_genre' was created and populated using API
+--create an app: App4LU
+--create data input by pointing to script file 'tmdb_genres.py' in /etc/apps/App4LU/bin/
+--Let this script write data into index 'tmdb_genre'
+
+Now lets load data into lookup
+index="tmdb_genre" | table id,name | outputlookup kvstore_lookup
+
+Now check if your lookup has data
+| inputlookup kvstore_lookup
+
+Now we can run query using lookups:
+For example:
+index="tmdb_new1" 
+| mvexpand genre_ids{}
+| rename genre_ids{} as genre_id,id as movie_id
+| table movie_id,original_title,genre_id
+| lookup kvstore_lookup id as genre_id OUTPUTNEW name
+
+since we created a kvstore lookup, lets look at files created
+in I:\Splunk\etc\apps\tmdb_new1\local > transforms.conf
+
+updating a lookup:
+First see if _key exists
+| inputlookup kvstore_lookup | eval key = _key
+
+Lets edit our lookup definition to have _key in fields,try the above query again which
+should now show key,id and name
+
+--search and update to test
+| inputlookup kvstore_lookup | eval key = _key | search key = 616e00dfd671000037006d05 | eval name = "Brutal Comedy"
+
+--update your kvstore_lookup
+| inputlookup kvstore_lookup | eval key = _key | search key = 616e00dfd671000037006d05 | eval name = "Brutal Comedy" | outputlookup kvstore_lookup append=true
+
+--verify
+| inputlookup kvstore_lookup | eval key = _key | search key = 616e00dfd671000037006d05
+
+Using Rest API:
+--Rest API to list the collections availablein tmdb_new1 app
+
+curl -k -u admin:Ajay@1234 https://localhost:8089/services/apps/local
+curl -k -u admin:Ajay@1234 https://localhost:8089/services/apps/local | grep tmdb
+
+--create another lookup 'kvstore_lookup1' using collection 'kvstorecoll'
+
+curl -k -u admin:Ajay@1234 https://localhost:8089/servicesNS/nobody/tmdb_new1/storage/collections/data/kvstorecoll -H 
+"Content-Type: application/json" -d "{\"name\": \"Splunk HQ\", \"id\": 999, \"address\": {\"street\": \"250 Bren Street\", 
+\"city\": \"Sanfrancisco\", \"state\": \"CA\", \"zip\": \"2345\"}}"
+
+--search for data
+| inputlookup kvstore_lookup1
+
+
+curl -k -u admin:Ajay@1234 -X DELETE https://localhost:8089/servicesNS/nobody/tmdb_new1/storage/collections/data/kvstorecoll -H 
+"Content-Type: application/json" -d "{\"name\": \"Splunk HQ\", \"id\": 999, \"address\": {\"street\": \"250 Bren Street\", 
+\"city\": \"Sanfrancisco\", \"state\": \"CA\", \"zip\": \"2345\"}}"
+
+==============================
+#Automatic lookups
+#Working with Geospatial lookups:
+
+--Creating Geo Maps
+geostats---generates statistics using statiscal function
+        ---helps create bins
+geom---used to build map for locational search
+geomfilter---used to filter out data based on geom
+
+=======
+CSV lookups:
+--we can work with index="_internal"
+
+Example1:
+--create a test.csv file
+log_level,colname2
+INFO,INFO has been converted
+WARN,WARN has been converted
+
+splunk>lookup>lookup table files>add ur csv
+destination file name: same
+change permissions.
+
+index ="_internal" log_level=* | lookup test.csv log_level OUTPUT colname2
+| table log_level colname2
+------------------------
+Example2:
+based on 
+Query: index="_internal"
+
+create a lookup file , say test2.csv
+eventtype,status,statustype
+splunkd-access,200,Informational
+splunkd-access,404,Important
+splunkd-access,401,NextToImp
+splunkd-access,500,IgnoreIt
+
+Add this lookup file.
+Create lookup definitions based on this file.
+
+run searches 
+index="_internal" eventtype="*" status="*" 
+| stats count by eventtype,status
+-----------------------------------
+#using lookup
+index="_internal" eventtype="*" status="*" 
+| lookup statuscheck eventtype OUTPUT statustype
+| stats count by statustype
+
+-----------------------------------
+index="_internal" eventtype="*" status="*" 
+| lookup statuscheck status OUTPUT statustype
+| stats count by statustype
+
+------------------------------------
+index="_internal" eventtype="*" status="*" 
+| lookup statuscheck eventtype,status OUTPUT statustype
+| stats count by statustype
+=====================================================================
+
+Geospatial lookups:
+upload data:
+https://github.com/ajaykuma/Datasets/blob/master/SalesJan2009.csv
+sourcetype: named : Geodata
+timestamp: current
+Create Index: sales2019
+host=salesdata
+
+#Query:
+index="sales2019" | geostats latfield=Latitude longfield=Longitude count by Country
+
+#Looking at visualization: chosen: clusterMap
+#Based on lat n long values, data is clustered in bins and we see PIE charts (of rendered data)
+#Looking into statistics shows us data divided in different bins.
+
+#Query:
+index="sales2019" | table Country,Latitude,Longitude 
+| search Country="Australia" 
+| geostats latfield=Latitude longfield=Longitude count by Country
+
+#zooming in:
+index="sales2019"  | table Country,Latitude,Longitude  
+| search Country="Australia" 
+| search Latitude>=-45.00000 Latitude<-22.50000 Longitude>=135.00000 Longitude<180.00000
+
+
+index="sales2019"  | table Country,Latitude,Longitude  
+| search Country="Australia" 
+| search Latitude>=-45.00000 Latitude<-22.50000 Longitude>=135.00000 Longitude<180.00000
+
+We can create a dashboard based on this:
+index="sales2019" | geostats latfield=Latitude longfield=Longitude count by Country
+
+Note**
+When splunk is installed we have by default 2 look up files:
+
+settings > Lookups > Lookup table files
+
+#Query:
+
+| inputlookup geo_countries
+| inputlookup geo_us_states
+
+1.geocountries
+--featureCollection : lookupname
+--featurID: countryname
+--geom: coordinates for particular country
+
+2.geo_us_states
+--has information of all usa states
+
+#Query:
+index="sales2019" | stats count by Country | geom geo_countries featureIdField=Country
+Format: Categorial
+Map type: Cloropleth Map
+
+#Using geofilter
+index="sales2019" | stats count by Country | geom geo_countries featureIdField=Country | geomfilter min_x=-90 min_y=-90
+max_x=90 max_y=90
+
+-----------------
+Good App to explore:
+https://splunkbase.splunk.com/app/3511/
+
+
+

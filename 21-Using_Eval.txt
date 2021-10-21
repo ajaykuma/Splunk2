@@ -1,0 +1,191 @@
+more on eval command
+------------------
+--widely used command
+--suports variety of functions
+---evaluates a expression and posts result as new 
+field/existing field
+
+concatenating fields using '.' or '+' operators
+
+index="xxx" eval new_field = 'field1' + 'field2' |
+table 'field1','field2','new_field'
+#using '+' will need fields to be strings
+
+index="xxx" eval new_field = 'field1' . 'field2' |
+table 'field1','field2','new_field'
+#using '.' is irrespective of field types
+
+index="_internal"
+
+#concatenating
+index="_internal" 
+| eval uriInfo = "URI_QUERY: " + uri_query + " URI: " + uri + " URI_PATH: "+ uri_path 
+|  stats count by uriInfo 
+|  table uriInfo count 
+
+#modifying an existing field
+[however not for an internal index]
+index="_internal" 
+| eval 'useragent' = 'useragent' + 'user'
+|  table user,useragent
+
+#eval chains & using case
+index="_internal" 
+| eval splunk_server="HP", description=case(status == 200, "GOOD", status ==404, "Not found", status == 201, "Internal Server Error", status == 204, 'Unknown Error',status == 400, 'Ignore it') 
+| table splunk_server,status,description 
+
+#using validate
+index="_internal" 
+| eval description=validate(status == 200, "not 200",status == 404, "not 404")
+| table splunk_server,status,description
+
+index="_internal" status="201"
+| eval description=validate(status == 200, "not 200",status == 404, "not 404",1=1,'status')
+| table splunk_server,status,description
+
+#using if
+index="_internal" status= "201"
+| eval description=if(status == 200,"Its good","Its not good")| table splunk_server,status,description
+
+or
+
+index="_internal" status= "201"
+| eval description=if(status = 200,"Its 200",if(status = 404,"Its 404","its neither 200 nor 404"))
+| table splunk_server,status,description
+
+or
+
+index="_internal" component="*"
+|  eval impComponents = if( component in ("Metrics","PeriodicHealthReporter","LMStackManager"),"condmet","condnotmet") 
+|  table impComponents,component 
+| stats count by impComponents,component
+
+#using where
+index="_internal" component="*"
+|  where component in ("Metrics","PeriodicHealthReporter","LMStackManager") 
+|  table component 
+| stats count by component
+
+#using where,eval,stats
+index="botsv1" category="*"
+| where category in ("Process Creation","Process Termination") 
+| eval time=strftime(_time, "%Y:%B:%d") | stats count by time,category
+
+#(use column chart)
+index="botsv1" category="*"
+| where category in ("Process Creation","Process Termination") 
+| eval time=strftime(_time, "%Y:%B:%d") | stats count by time,category 
+| chart count by time,category
+
+#(use line chart)
+index="botsv1" category="*"
+| where category in ("Process Creation","Process Termination") 
+| eval time=strftime(_time, "%Y:%B:%d") 
+| timechart span=7d count(category) by time
+
+#using like and if
+index="botsv1" category="*"
+| eval cat_of_interest = if (like(category,"%Process%"),"ProcessRelated","NotNeeded") 
+| eval time=strftime(_time, "%Y:%B:%d") 
+| table time,category,cat_of_interest
+
+#using coalesce (finding first non null values)
+index="botsv1" 
+| eval new_field = coalesce(dest,dest_ip) 
+| table new_field 
+|  stats count by new_field 
+|  sort count desc
+
+When might you use the coalesce command?
+“Defense in depth” is an older methodology used for perimeter security. The concept includes creating multiple barriers 
+the “hacker” must cross before penetrating an environment. Part of the practice of making it difficult for someone with 
+malicious intent includes using multiple vendors at certain layers. For example, at any given moment in time, one vendor’s
+ firewall may have exploitable vulnerabilities whereas another’s may not. Theoretically, this leaves you less exposed.
+ Whether it is from an old defense in depth strategy or multiple corporate mergers, multi-vendor environments continue
+ to introduce risk. 
+In mixed environments, logging standards cannot possibly be sustained as vast amounts of “machine generated data” is
+ created and fields within the data are labeled differently. For instance, one vendor will use “sip” to describe source IP,
+ while another might use “src_ip”. Another example is the different EventIDs logged for different versions of Windows OSs.
+ EventIDs for desktop firewall changes, (for example we have 852, 4946, 4947 or 4948) but they all represent the same event.
+
+The coalesce command normalizes field names with the same value. Coalesce takes the first non-null value to combine.
+
+Sample data:
+Thu Mar 6 11:33:49 EST 2014 src_ip=1.1.1.1
+Thu Mar 6 11:33:45 EST 2014 sourceip=8.1.2.3
+Thu Mar 6 11:33:48 EST 2014 source_ip=1.1.1.0
+Thu Mar 6 11:33:47 EST 2014 sip=1.1.1.199
+Thu Mar 6 11:33:46 EST 2014 ip=
+Thu Mar 6 11:33:46 EST 2014 ip=22.22.22.22
+
+Here we are going to “coalesce” all the desperate keys for source ip and put them under one common name src_ip 
+for further statistics.
+
+For this example, copy and paste the above data into a file called firewall.log. Then use the oneshot command to 
+index the file:
+
+./splunk add oneshot “/your/log/file/firewall.log” –sourcetype firewall
+
+sourcetype=firewall
+| eval src_ip = coalesce(src_ip,sourceip,source_ip,sip,ip)
+
+#conversion
+coverting tonumber: example
+index="main" 
+|  eval field1 = "200" , new_field = tonumber(field1) 
+|  eval sum = new_field+7 
+|  table field1,new_field,sum
+
+converting tostring
+index="main" 
+|  eval field1 = 9988888834 , new_field = tostring(field1) 
+| table field1,new_field
+
+index="main" 
+|  eval field1 = 9988888834 , new_field = tostring(field1,"commas") 
+| table field1,new_field
+
+index="main" 
+|  eval field1 = 360 , new_field = tostring(field1,"duration") 
+| table field1,new_field
+
+index="main" 
+|  eval field1 = 360 , new_field = tostring(field1,"hex") 
+| table field1,new_field
+
+#using crypytography function(encoding)
+index="main" 
+|  eval field1 = "334-556-78896" , new_field = sha1(field1) 
+| table field1,new_field
+
+#getting datatypes
+index="botsv1" 
+| eval acctdomain = "Account_Domain" + ":" + typeof("Account_Domain"),category_new = "category" + ":" + typeof("category")
+|  table category_new,acctdomain
+
+index="botsv1" 
+| eval category_new = substr('category',1,4)
+| stats count by category_new
+
+#using eval in stats:
+index="botsv1" | stats count(eval('category'=="Special Logon")) as count
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+ 

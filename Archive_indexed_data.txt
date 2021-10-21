@@ -1,0 +1,75 @@
+Archiving Indexed Data
+------------
+Depending on 'retirement and archiving policy'
+Data starts out in the hot database, under $SPLUNK_HOME/var/lib/splunk/defaultdb/db/. 
+It then moves to the warm database, $SPLUNK_HOME/var/lib/splunk/defaultdb/db. 
+Eventually,data is aged into the cold database $SPLUNK_HOME/var/lib/splunk/defaultdb/colddb.
+Finally, data reaches the frozen state.
+
+
+coldToFrozenDir: This attribute specifes a location where the indexer will automatically archive frozen data.
+coldToFrozenScript: This attribute specifes a user-supplied script that the indexer will run when the data is
+frozen.
+#Sample script
+($SPLUNK_HOME/bin/coldToFrozenExample.py)
+
+The coldToFrozenDir attribute takes precedence over coldToFrozenScript, if both are set.
+Default : name of the bucket being erased is written to the log file $SPLUNK_HOME/var/log/splunk/splunkd_stdout.log
+
+How the indexer archives the frozen data depends on whether the data was originally indexed in a pre-4.2 release:
+· For buckets created from version 4.2 and on, the indexer will remove all files except for the rawdata file.
+· For pre-4.2 buckets, the script simply gzip's all the .tsidx and .data files in the bucket.
+
+example:(if using script)
+coldToFrozenScript = "$SPLUNK_HOME/bin/python" "$SPLUNK_HOME/bin/myColdToFrozen.py"
+
+For example: in nonclustered 
+[logindex3]
+homePath   = $SPLUNK_DB/$_index_name/db
+coldPath   = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/$_index_name/Archived
+
+In Indexer Cluster:
+each individual peer node rolls its buckets to frozen
+all copies of a bucket should roll to frozen at approximately the same time
+there can be some variance in the timing, because the same index can grow at different rates on different
+peers. The cluster performs processing to ensure that buckets freeze smoothly across all peers in the cluster.
+if you have a cluster with a replication factor of 3, the cluster stores three copies of all its data across its
+set of peer nodes, thus multiple copies of archived data.
+
+Using mount points can be a solution or timely archiving strategy.
+
+example: in clustered
+
+[logindex3]
+repFactor = auto
+homePath   = $SPLUNK_DB/$_index_name/db
+coldPath   = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/$_index_name/Archived
+
+===========================================
+
+Retirement and Archiving Policy:
+The maxTotalDataSizeMB and frozenTimePeriodInSecs attributes in indexes.conf help determine when buckets roll from
+cold to frozen. These attributes are described in detail below.
+
+edit indexes.conf (in case of non-clustered/clustered indexes)
+set size of an index to determine when data gets frozen and removed from the index.
+
+[main]
+maxTotalDataSizeMB = 250000
+Specify the size in megabytes.
+
+This setting works with frozenTimePeriodInSecs to determine when data gets frozen. 
+Data rolls to frozen when either setting is reached.
+#default time is 6 years
+#can be set to 15552000 secs for 180 days
+
+[main]
+maxTotalDataSizeMB = 250000
+frozenTimePeriodInSecs = 188697600
+
+You can reduce bucket size by setting a smaller 'maxDataSize' in indexes.conf so they roll faster.
+

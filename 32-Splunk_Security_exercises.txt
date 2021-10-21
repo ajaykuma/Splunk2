@@ -1,0 +1,18 @@
+Splunk security: Exercices:
+
+try working on these:
+default username: splunk
+pswd: splunk
+
+http://security-gs.splunkoxygen.com/en-US/app/security_getting_started/sec_search_01
+
+http://security-gs.splunkoxygen.com/en-US/app/security_getting_started/sec_search_02
+
+http://security-gs.splunkoxygen.com/en-US/app/security_getting_started/sec_search_03
+
+http://security-gs.splunkoxygen.com/en-US/app/security_investigation_webproxy/sec_search_01
+
+
+
+
+

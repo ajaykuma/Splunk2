@@ -1,0 +1,14 @@
+Add a note to investigation
+1. From the investigation bar, click the (notes) icon
+2. In the investigation notes window, click Add new Note or Add new Timeline Note.
+Timeline notes show up in the timeline slide view, while standard notes do not.
+
+3. Type a title for the note.For example, "Phone conversation with police."
+4. Select a date and time. The default is the current date and time.sFor example, select the time of the phone call.
+5. (Optional) Click the check box to show or hide the note on the timeline.
+6. (Optional) Type a description.For example, a note to record a phone conversation might include the description: Called the police. Spoke with Detective Reggie Martin. Discussed an employee stealing identities from other employees.
+7. (Optional): Attach a file to the note.
+	a) In the attachments section, drag the file onto the note or click browse to find the file.
+	b) Select a file to add from your computer.	The maximum file size is 4 MB. You can add multiple files to a note. The first file you add to the note 	previews on the investigation timeline.
+	c) If the filename contains unsupported characters, click the Replace not supported characters with 	'-' and then click Change.	Alternately, you can remove and replace the unsupported characters manually.
+8)Click Add to Investigation to add the note to the open investigation.

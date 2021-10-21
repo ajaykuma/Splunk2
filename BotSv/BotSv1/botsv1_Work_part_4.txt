@@ -1,0 +1,46 @@
+https://github.com/splunk/botsv1
+
+Now..
+Note** I uploaded 'botsv1-attack-only'
+
+continued..
+=============
+Query:
+index=botsv1
+
+Search for 'registry_type' in 'INTERESTING FIELDS'
+
+Add to Query: to see top registry_types
+index=botsv1 | top registry_type
+
+result:
+registry_type	count	percent
+CreateKey	25627	87.068936
+SetValue	3738	12.700031
+DeleteKey	68	0.231033
+
+Query: (turnoff percentage)
+index=botsv1 | top registry_type showperc=f 
+
+registry_type	count
+CreateKey	20169
+SetValue	1749
+DeleteKey	34
+
+Query: top 10 events with combination of eventtype and registrytype
+index="botsv1" | top "tag::eventtype" registry_type
+
+#limiting results
+index="botsv1" | top "tag::eventtype" registry_type limit=5
+index="botsv1" | rare "tag::eventtype" registry_type limit=5
+
+#renaming fields
+index="botsv1" | rare countfield="Erro" "tag::eventtype" registry_type limit=5
+
+#using stats
+index="botsv1" vulnerability | stats count by dest_ip
+index="botsv1" | stats dc(dest_ip)
+index="botsv1" | stats count by dest_ip
+
+more examples will be added...
+

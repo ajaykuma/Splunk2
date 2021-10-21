@@ -1,0 +1,351 @@
+Restoring archived data:
+You restore archived data by moving the archived bucket into your thawed directory
+Data in thaweddb is not subject to the server's index aging scheme (hot > warm> cold > frozen)x
+
+--create a new index say 'logindex6' 
+--this will not have any 'frozenToTimePeriodInSecs' setting.When Index created check if 'Archived' folder gets created.
+
+--in indexes.conf
+[logindex6]
+repFactor = auto
+homePath   = $SPLUNK_DB/$_index_name/db
+coldPath   = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/logindex6/Archived
+#frozenTimePeriodInSecs = 7776000
+
+--to put data into this index,edit inputs.conf
+[monitor://$SPLUNK_HOME/var/log/splunk/splunkd.log*]
+index = logindex6
+
+--push the configuration bundle
+--check if index was created and if data shows up, look at count of data.
+--check if archived folder was created and is empty
+--check if ur data shows data coming in from all 3 hosts and source shows /usr/local/splunk/var/log/splunk/splunkd.log
+--check which peer has hot buckets
+--check within indexes directory in db folder 
+
+#for example:
+--For now running I have masternode(n1),peernodes(n2,n3)
+--querying index 'index="logindex6" shows 81,944 events
+
+Peer 1 shows:
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6
+total 28
+drwx------  7 adminu adminu 4096 Sep 26 18:45 .
+drwx------ 20 adminu adminu 4096 Sep 26 18:51 ..
+drwx------  2 adminu adminu 4096 Sep 26 18:45 Archived
+drwx------  2 adminu adminu 4096 Sep 26 18:51 colddb
+drwx------  2 adminu adminu 4096 Sep 26 18:45 datamodel_summary
+drwx------  7 adminu adminu 4096 Sep 26 18:52 db
+drwx------  2 adminu adminu 4096 Sep 26 18:45 thaweddb
+
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/
+total 8
+drwx------ 2 adminu adminu 4096 Sep 26 18:45 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 36
+drwx------ 7 adminu adminu 4096 Sep 26 18:52 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  855 Sep 26 18:52 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+drwx--x--- 3 adminu adminu 4096 Sep 26 18:46 db_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+-rw------- 1 adminu adminu    0 Sep 26 18:48 db_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+drwx--x--- 3 adminu adminu 4096 Sep 26 18:51 db_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+drwx------ 3 adminu adminu 4096 Sep 26 18:50 rb_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 18:51 rb_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+
+Peer 2 shows:
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6
+total 28
+drwx------  7 adminu adminu 4096 Sep 26 18:45 .
+drwx------ 20 adminu adminu 4096 Sep 26 18:51 ..
+drwx------  2 adminu adminu 4096 Sep 26 18:45 Archived
+drwx------  2 adminu adminu 4096 Sep 26 18:51 colddb
+drwx------  2 adminu adminu 4096 Sep 26 18:45 datamodel_summary
+drwx------  7 adminu adminu 4096 Sep 26 18:52 db
+drwx------  2 adminu adminu 4096 Sep 26 18:45 thaweddb
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/
+total 8
+drwx------ 2 adminu adminu 4096 Sep 26 18:45 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 36
+drwx------ 7 adminu adminu 4096 Sep 26 18:52 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  855 Sep 26 18:52 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+drwx--x--- 3 adminu adminu 4096 Sep 26 18:50 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 3 adminu adminu 4096 Sep 26 18:51 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+drwx------ 3 adminu adminu 4096 Sep 26 18:48 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 18:51 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+
+
+--push inputs.conf in '/usr/local/splunk/etc/master-apps/_cluster/local' again stopping any more inputs
+--to put data into this index,edit inputs.conf
+#[monitor://$SPLUNK_HOME/var/log/splunk/splunkd.log*]
+#index = logindex6
+
+--push configuration bundle
+--query index to check if data exists in ur index
+--At this point of time, I have total 82,311 events. Might be number of events from splunkd log were pushed in again before we stopped 
+
+--now to test archiving,set frozenTimePeriodInSecs to 600 secs, which means any data older than 10 minutes will start moving out
+#of index into Archived and eventually index will be emptied.
+#note as oer default settings, data from movies from hot to cold and from cold to archived based on timings we set.
+
+--make changes to indexes.conf and push configuration bundle
+[logindex6]
+repFactor = auto
+homePath   = $SPLUNK_DB/$_index_name/db
+coldPath   = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/logindex6/Archived
+frozenTimePeriodInSecs = 600
+
+--check if index event count reduces
+--check if data is moved into 'Archived'
+--check what remains in db folder of index
+--Now my index is emptied
+--Notice db_*** shows originating
+--Notice rb_*** shows replicating
+
+Peer 1 shows:
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 20
+drwx------ 3 adminu adminu 4096 Sep 26 19:02 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  169 Sep 26 19:02 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+-rw------- 1 adminu adminu    0 Sep 26 18:48 db_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+-rw------- 1 adminu adminu    0 Sep 26 19:02 db_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+-rw------- 1 adminu adminu    0 Sep 26 19:02 rb_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+-rw------- 1 adminu adminu    0 Sep 26 19:02 rb_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/
+total 24
+drwx------ 6 adminu adminu 4096 Sep 26 19:02 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:02 db_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:02 db_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 19:02 rb_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 19:02 rb_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+#data older than 10 minutes was moved to Archived folder instead of splunk deleting it
+
+Peer 2 shows same:
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 20
+drwx------ 3 adminu adminu 4096 Sep 26 19:01 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  169 Sep 26 19:01 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+-rw------- 1 adminu adminu    0 Sep 26 19:01 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+-rw------- 1 adminu adminu    0 Sep 26 19:01 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+-rw------- 1 adminu adminu    0 Sep 26 19:01 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+-rw------- 1 adminu adminu    0 Sep 26 19:01 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/
+total 24
+drwx------ 6 adminu adminu 4096 Sep 26 19:01 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:01 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:01 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 19:01 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 19:01 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+
+--The bucket directory contains in Archived only the rawdata directory, which contains journal.gz
+--for example:
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8/
+total 12
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:01 .
+drwx------ 6 adminu adminu 4096 Sep 26 19:01 ..
+drwx------ 2 adminu adminu 4096 Sep 26 19:01 rawdata
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8/rawdata/
+total 1136
+drwx------ 2 adminu adminu    4096 Sep 26 19:01 .
+drwx--x--- 3 adminu adminu    4096 Sep 26 19:01 ..
+-rw------- 1 adminu adminu 1152844 Sep 26 18:50 journal.gz
+
+#to restore, we need to copy these directories in thawed directory
+
+--ensure bucketid doesn't conflict
+
+adminu@n3:~$ cp -r /usr/local/splunk/var/lib/splunk/logindex6/Archived/* /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/
+total 24
+drwx------ 6 adminu adminu 4096 Sep 26 19:09 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:09 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:09 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 19:09 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 19:09 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+
+--restoring
+adminu@n3:~$ splunk rebuild /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8/ logindex6
+USAGE: splunk rebuild <bucketPath> [<indexName>] [--ignore-read-error] [--no-log]
+Please see 'splunk fsck' for more options.  This command is just a wrapper for 'splunk fsck'.
+
+Redirecting to 'splunkd fsck' with args:
+	repair --one-bucket --include-hots --bucket-path=/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8/ --index-name=logindex6 --log-to--splunkd-log 
+INFO  Fsck - (entire bucket) Rebuild for bucket='/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8' took 1158.2 milliseconds
+
+adminu@n3:~$ splunk rebuild /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8/ logindex6
+USAGE: splunk rebuild <bucketPath> [<indexName>] [--ignore-read-error] [--no-log]
+Please see 'splunk fsck' for more options.  This command is just a wrapper for 'splunk fsck'.
+
+Redirecting to 'splunkd fsck' with args:
+	repair --one-bucket --include-hots --bucket-path=/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8/ --index-name=logindex6 --log-to--splunkd-log 
+INFO  Fsck - (entire bucket) Rebuild for bucket='/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8' took 261.8 milliseconds
+
+adminu@n3:~$ splunk rebuild /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476/ logindex6
+USAGE: splunk rebuild <bucketPath> [<indexName>] [--ignore-read-error] [--no-log]
+Please see 'splunk fsck' for more options.  This command is just a wrapper for 'splunk fsck'.
+
+Redirecting to 'splunkd fsck' with args:
+	repair --one-bucket --include-hots --bucket-path=/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476/ --index-name=logindex6 --log-to--splunkd-log 
+INFO  Fsck - (entire bucket) Rebuild for bucket='/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476' took 2172.9 milliseconds
+
+adminu@n3:~$ splunk rebuild /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476/ logindex6
+USAGE: splunk rebuild <bucketPath> [<indexName>] [--ignore-read-error] [--no-log]
+Please see 'splunk fsck' for more options.  This command is just a wrapper for 'splunk fsck'.
+
+Redirecting to 'splunkd fsck' with args:
+	repair --one-bucket --include-hots --bucket-path=/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476/ --index-name=logindex6 --log-to--splunkd-log 
+INFO  Fsck - (entire bucket) Rebuild for bucket='/usr/local/splunk/var/lib/splunk/logindex6/thaweddb/rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476' took 280.3 milliseconds
+
+
+splunk restart(on n3)
+splunk restart(on n2)
+
+--This was done on n3 and now searching shows all events are back on n3 indexer,
+--but doesnt show data on n2
+--rememeber data from thawed doesn't get replicated
+
+--At this time n3 shows:
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/
+total 24
+drwx------ 6 adminu adminu 4096 Sep 26 19:21 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:15 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+-rw------- 1 adminu adminu    0 Sep 26 19:13 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:17 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+-rw------- 1 adminu adminu    0 Sep 26 19:17 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+drwx------ 3 adminu adminu 4096 Sep 26 19:20 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+-rw------- 1 adminu adminu    0 Sep 26 19:20 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+drwx------ 3 adminu adminu 4096 Sep 26 19:21 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+-rw------- 1 adminu adminu    0 Sep 26 19:21 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/
+total 24
+drwx------ 6 adminu adminu 4096 Sep 26 19:01 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:01 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:01 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 19:01 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 19:01 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 20
+drwx------ 3 adminu adminu 4096 Sep 26 19:22 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  839 Sep 26 19:22 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+-rw------- 1 adminu adminu    0 Sep 26 19:01 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+-rw------- 1 adminu adminu    0 Sep 26 19:01 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+-rw------- 1 adminu adminu    0 Sep 26 19:01 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+-rw------- 1 adminu adminu    0 Sep 26 19:01 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+
+#copy/mv data from thaweddb to db
+adminu@n3:~$ mv /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/* /usr/local/splunk/var/lib/splunk/logindex6/db/ 
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 36
+drwx------ 7 adminu adminu 4096 Sep 26 19:27 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  839 Sep 26 19:22 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:15 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+-rw------- 1 adminu adminu    0 Sep 26 19:13 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:17 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+-rw------- 1 adminu adminu    0 Sep 26 19:17 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8.rbsentinel
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+drwx------ 3 adminu adminu 4096 Sep 26 19:20 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+-rw------- 1 adminu adminu    0 Sep 26 19:20 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+drwx------ 3 adminu adminu 4096 Sep 26 19:21 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+-rw------- 1 adminu adminu    0 Sep 26 19:21 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476.rbsentinel
+
+#remove sentilnel files
+adminu@n3:~$ rm -rf /usr/local/splunk/var/lib/splunk/logindex6/db/*.rbsentinel
+
+adminu@n3:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 36
+drwx------ 7 adminu adminu 4096 Sep 26 19:28 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  839 Sep 26 19:22 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:15 db_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 3 adminu adminu 4096 Sep 26 19:17 db_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+drwx------ 3 adminu adminu 4096 Sep 26 19:20 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 19:21 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+
+#empty archived
+adminu@n3:~$ rm -rf /usr/local/splunk/var/lib/splunk/logindex6/Archived/*
+
+Note**Data does not get replicated from the thawed directory,but get's replicated from db
+
+<restart splunk>
+
+on n2
+
+After some time
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/db
+total 40
+drwx------ 8 adminu adminu 4096 Sep 26 20:08 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+-rw------- 1 adminu adminu  856 Sep 26 20:08 .bucketManifest
+-rw------- 1 adminu adminu   10 Sep 26 18:45 CreationTime
+drwx--x--- 2 adminu adminu 4096 Sep 26 18:45 GlobalMetaData
+drwx------ 3 adminu adminu 4096 Sep 26 20:07 rb_1601138760_1600713026_0_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 20:07 rb_1601139057_1600713150_0_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 20:07 rb_1601139066_1601138760_1_68C02B11-4C26-44E0-8209-528C8E61C476
+drwx------ 3 adminu adminu 4096 Sep 26 20:07 rb_1601139089_1601139057_1_65A404AF-22A7-4B8D-8A60-9402E30B58C8
+drwx------ 3 adminu adminu 4096 Sep 26 20:07 _splunktemps
+
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/Archived/
+total 8
+drwx------ 2 adminu adminu 4096 Sep 26 19:32 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+adminu@n2:~$ ls -all /usr/local/splunk/var/lib/splunk/logindex6/thaweddb/
+total 8
+drwx------ 2 adminu adminu 4096 Sep 26 18:45 .
+drwx------ 7 adminu adminu 4096 Sep 26 18:45 ..
+
+<restart splunk>
+
+All data should be back in indexes.
+Thus for next time, we can set frozen time to 10 days 
+
+#finally make changes on master to indexes.conf to set time to 10 days
+[logindex6]
+repFactor = auto
+homePath   = $SPLUNK_DB/$_index_name/db
+coldPath   = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/logindex6/Archived
+frozenTimePeriodInSecs = 864000
+
+--push configuration bundle
+

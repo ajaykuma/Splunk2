@@ -1,0 +1,82 @@
+#For reference
+
+#########################
+# Global settings
+#########################
+
+# Inheritable by all indexes: No hot/warm bucket can exceed 1 TB.
+# Individual indexes can override this setting. The global 
+# summaryHomePath setting indicates that all indexes that do not explicitly
+# define a summaryHomePath value will write report acceleration summaries 
+# to the small_indexes # volume. 
+[global]
+homePath.maxDataSizeMB = 1000000
+summaryHomePath = volume:small_indexes/$_index_name/summary
+
+#########################
+# Volume definitions
+#########################
+
+# This volume is designed to contain up to 100GB of summary data and other 
+# low-volume information.
+[volume:small_indexes]
+path = /mnt/small_indexes
+maxVolumeDataSizeMB = 100000 
+
+# This volume handles everything else. It can contain up to 50 
+# terabytes of data.
+[volume:large_indexes]
+path = /mnt/large_indexes
+maxVolumeDataSizeMB = 50000000
+
+#########################
+# Index definitions
+#########################
+
+# The report_acceleration and rare_data indexes together are limited to 100GB, per the 
+# small_indexes volume.
+[report_acceleration]
+homePath = volume:small_indexes/report_acceleration/db
+coldPath = volume:small_indexes/report_acceleration/colddb
+thawedPath = $SPLUNK_DB/summary/thaweddb
+summaryHomePath = volume:small_indexes/report_acceleration/summary
+maxHotBuckets = 2
+
+[rare_data] 
+homePath = volume:small_indexes/rare_data/db
+coldPath = volume:small_indexes/rare_data/colddb
+thawedPath = $SPLUNK_DB/rare_data/thaweddb
+summaryHomePath = volume:small_indexes/rare_data/summary
+maxHotBuckets = 2
+
+# Splunk constrains the main index and any other large volume indexes that 
+# share the large_indexes volume to 50TB, separately from the 100GB of the 
+# small_indexes volume. Note that these indexes both use summaryHomePath to 
+# direct summary data to the small_indexes volume.
+[main]
+homePath = volume:large_indexes/main/db
+coldPath = volume:large_indexes/main/colddb
+thawedPath = $SPLUNK_DB/main/thaweddb
+summaryHomePath = volume:small_indexes/main/summary
+maxDataSize = auto_high_volume
+maxHotBuckets = 10
+
+# Some indexes reference the large_indexes volume with summaryHomePath, 
+# which means their summaries are created in that volume. Others do not 
+# explicitly reference a summaryHomePath, which means that the Splunk platform 
+# directs their summaries to the small_indexes volume, per the [global] stanza.
+[idx1_large_vol]
+homePath=volume:large_indexes/idx1_large_vol/db
+coldPath=volume:large_indexes/idx1_large_vol/colddb
+homePath=$SPLUNK_DB/idx1_large/thaweddb
+summaryHomePath = volume:large_indexes/idx1_large_vol/summary
+maxDataSize = auto_high_volume
+maxHotBuckets = 10
+frozenTimePeriodInSecs = 2592000
+
+[other_data]
+homePath=volume:large_indexes/other_data/db
+coldPath=volume:large_indexes/other_data/colddb
+homePath=$SPLUNK_DB/other_data/thaweddb
+maxDataSize = auto_high_volume
+maxHotBuckets = 10

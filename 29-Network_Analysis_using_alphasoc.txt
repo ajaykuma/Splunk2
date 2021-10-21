@@ -1,0 +1,43 @@
+Network Behaviour Analytics for Splunk:
+Download from splunkbase:
+https://splunkbase.splunk.com/app/4052/
+
+or search in splunk>apps>alphasoc
+
+additionally refer to : https://alphasoc.com/docs/nba-introduction
+
+once installed--prompts to generate API Key:
+select> I am a new user and want to generate a free Key>generate key > veryfiy ur email ID
+
+Once activated, app gets populated with dashboards and other settings.
+Instead of just looking at 1-Dimensional correlations in splunk, here we can see 2-D,3-D scoring
+--time deltas ie timing between requests to a particular domain
+--spikes in activity
+--interacting with third party APIs/services
+
+So for example every domain name seen, there might be a browser > understand nameservers, agent name, registration info etc
+the available information is correlated with Google Safe browsing, DNS threat blocking providers,sandbox engines and all 
+kind of other third party services/APIs.
+Also then mapping to threat intelligence and categories..
+
+--in all these layers,deep analytics is done and then all kind of emerging threats are flagged.
+
+---look into documentation on above provided link
+
+Additional look into:
+https://docs.splunk.com/Documentation/CIM/4.17.0/User/Overview
+
+Exploring App:
+Click on Data Location:
+Shows various data providers: DNS, IP, HTTP telemetry data.
+Note** System can run with any datasets provided.
+
+Click on group: define your monitoring scope
+Monitoring scope:
+(here we can look at systems within our evironment, network blocks and network ranges, 
+we can whitelist/blacklist domains.
+The data with which app ships has all kind of RFC18,19 ranges included in monitoring scope.
+all kind of private, rfc18,19 are excluded from monitoring scope.
+
+-----------------------------------------
+

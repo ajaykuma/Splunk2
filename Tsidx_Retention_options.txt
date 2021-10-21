@@ -1,0 +1,49 @@
+Configure tsidx to reduce disk usage
+--------------------
+
+From webUI:
+
+Settings>indexes>choose an index ( or could have done when index was being created)
+'Enable tsidx reduction'
+timeframe - for example 7 days.
+
+Note** Once enabled,every 10 mins check runs to check if tsidx files are larger and older than specified age to 
+start reduction of those into mini tsidx files.
+
+--Try this with a large index or which has more data and check in 
+<$SPLUNK_HOME/var/lib/splunk/indexname/db/
+----------------------------------------------------------
+From CLI:
+in non-indexer cluster
+splunk edit index newone -enableTsidxReduction true -timePeriodInSecBeforeTsidxReduction 864000
+
+in indexer cluster, update in your <$SPLUNK_HOME/etc/master-apps/_cluster/local/indexes.conf
+for example for 'logindex4'
+[logindex4]
+repFactor = auto
+homePath   = $SPLUNK_DB/$_index_name/db
+coldPath   = $SPLUNK_DB/$_index_name/colddb
+thawedPath = $SPLUNK_DB/$_index_name/thaweddb
+coldToFrozenDir = $SPLUNK_DB/$_index_name/Archived
+enableTsidxReduction = true
+timePeriodInSecBeforeTsidxReduction = 604800
+
+or this could be for all indexes,by placing it under 'default' section
+[default]
+enableTsidxReduction = true
+timePeriodInSecBeforeTsidxReduction = 604800
+------------------------------------------------------------
+Determine whether a bucket is reduced
+Run the dbinspect search command:
+| dbinspect index=_internal
+The tsidxState field in the results specifies "full" or "mini" for each bucket.
+------------------------------------------------------------
+To revert a bucket with mini-tsidx files to full-size tsidx files:
+1. Stop the indexer.
+2. In indexes.conf, either disable tsidx reduction or increase the age setting for tsidx reduction beyond the age of the
+buckets that you want to restore. Otherwise, the bucket will be reduced for a second time soon after you revert it.
+
+3. Run the splunk rebuild command on the bucket:
+
+splunk rebuild <bucket directory> <index name>
+

@@ -1,0 +1,477 @@
+#botsv1_Work_part_xxxxx.txt files have manual way of loading data and working on scenarios.
+#Instead we can also use this app and continue splunking..
+
+Investigating with Splunk Workshop App
+-----------
+
+#Download https://splunkbase.splunk.com/app/3985/ and gunzip>untar into splunk_home/etc/apps
+<restart splunk>
+
+#Access the App
+
+#using metadata
+#search the botsv1 index and return a listing of all the sourcetypes 
+that can be found as well a count of events and the first time and last time seen.
+
+| metadata type=sourcetypes index=botsv1
+
+#or
+
+| metadata type=sourcetypes index=botsv1 | top sourcetype limit=5
+
+#converting time in human readable
+
+| metadata type=sourcetypes index=botsv1 | convert ctime(firstTime) as firstTime | convert ctime(lastTime) as lastTime
+| convert ctime(recentTime) as recentTime
+
+#Click > 
+#Scenario #1 - APT
+#Finding the IP Scanning Your Web Server (Part 1 of 2)
+#What is the likely IP address of someone from the P01s0n1vy group scanning imreallynotbatman.com for web application vulnerabilities?
+
+#First>understand the different sourcetypes that are scanning the website imreallynotbatman.com.
+#Then> search to find the IP address that is performing the scanning.
+
+index=botsv1 imreallynotbatman.com
+
+#Identify sourcetypes Associated with Search Values by clicking on 'sourcetypes' from 'selected fields'
+
+#or
+
+index=botsv1 imreallynotbatman.com | stats count by sourcetype | sort count desc
+
+#All Data Referencing the Website by src
+#Identify srcs Associated with Search Values by clicking on 'src' from 'interesting fields'
+
+#or
+
+index=botsv1 imreallynotbatman.com src="*" | stats count by src | table src count | sort count desc
+
+#Selecting a sourcetype and Searching for Source Address
+#drill down on the sourcetype of stream:http to see what kind of web data is being seen on the wire. 
+#we have narrowed our search to stream:http data, we can again drill down and see what source IP addresses 
+#are associated with our domain. 
+
+index=botsv1 imreallynotbatman.com sourcetype=stream:http
+
+#Identify srcs Associated with Search Values by clicking on 'src' from 'interesting fields'
+
+index=botsv1 imreallynotbatman.com sourcetype=stream:http | stats count by src
+
+#Values		Count	%	 
+#40.80.148.42	20,964	94.432%	
+#23.22.63.114	1,236	5.568%
+
+#Click >: 
+#Validating the IP That is Scanning Your Web Server (Part 2 of 2)
+#What is the likely IP address of someone from the P01s0n1vy group scanning imreallynotbatman.com for web application vulnerabilities?
+
+#If we take the IP address we found with our stream data and change our sourcetype to Suricata (an IDS tool and more),
+#we can see a number of logged events coming from that source IP address. 
+#Because Suricata has IDS signatures associated with it.
+
+#Taking the IP with highest count
+
+index=botsv1 imreallynotbatman.com src=40.80.148.42 sourcetype=suricata
+
+#we can see what appear to be web server signatures firing,
+#we can infer that this IP address is indeed scanning our website. 
+
+#Looking for signature data
+
+index=botsv1 imreallynotbatman.com src=40.80.148.42 sourcetype=suricata
+
+#>click on more fields and select 'signature' > now signature should be added to 'Selected fields'
+#>click on signature to see top 10 values 
+
+#or
+
+index=botsv1 imreallynotbatman.com src=40.80.148.42 sourcetype=suricata signature="*" | stats count by signature | table signature count | sort count desc
+
+#Another Option: Search Stream sourcetype and Count the src_ip
+
+index=botsv1 imreallynotbatman.com sourcetype=stream* | stats count(src_ip) as Requests by src_ip | sort - Requests
+
+#Click>
+#Identifying The Web Vulnerability Scanner
+#What company created the web vulnerability scanner used by P01s0n1vy?
+
+#web vulnerability scans originated from the particular source IP 40.80.148.42, we can search for traffic 
+#from 40.80.148.42 and examine the src_headers for clues related to the tool being used for the scan.
+
+#Looking at src_headers
+
+index=botsv1 src=40.80.148.42 sourcetype=stream:http
+
+#and click on src_headers field under 'Interesting fields'
+
+#or
+
+index=botsv1 src=40.80.148.42 sourcetype=stream:http src_headers="*" | stats count by src_headers | sort count desc
+
+#Looking at http_user_agent strings
+#look in other fields of the HTTP wire data. If we look at http_user_agent, we see 
+#some anomalous/unusual agent strings and in a few of them we again see Acunetix.
+
+index=botsv1 src=40.80.148.42 sourcetype=stream:http
+
+#and click on http_user_agent
+
+#or
+
+index=botsv1 src=40.80.148.42 sourcetype=stream:http http_user_agent="*" | stats count by http_user_agent | sort count desc
+
+#Click>
+#Determining Which Web Server is the Target
+#What content management system is imreallynotbatman.com likely using?
+#To find the systems that are operating within the environment. 
+#Now we want to know what is running on our website > understand the underlying techgnology, 
+>find the vulnerabilities that exist on our systems and can eradicate them.
+
+#identify the IP address of the victim system.
+
+index=botsv1 src=40.80.148.42 sourcetype=stream:http
+
+#and click on dest_ip
+
+#or
+
+index=botsv1 src=40.80.148.42 sourcetype=stream:http| top limit=20 dest_ip
+
+#Digging into the URI
+#we know the sourcetype AND we know the IP of the web server, we can start looking at URLs or 
+#URIs to get an idea of the kind of files and directory structures being requested. 
+
+index=botsv1 dest=192.168.250.70 sourcetype=stream:http
+
+#and click on uri 
+
+#or
+
+index=botsv1 dest=192.168.250.70 sourcetype=stream:http| top limit=20 uri
+
+#or better way
+
+index=botsv1 dest=192.168.250.70 sourcetype=stream:http| top limit=20 uri | table count uri
+
+#take your original search to find our URIs and add a status of 200 to our search to indicate successful page loads.
+
+index=botsv1 dest=192.168.250.70 sourcetype=stream:http status=200 | stats count by uri | sort - count
+
+#Finding the Answer With IIS
+
+index=botsv1 sourcetype=iis sc_status=200 | stats values(cs_uri_stem)
+
+#As we found earlier, imreallynotbatman.com is hosted on 192.168.250.70. 
+#We have IIS logs for that host (we1149srv). We could search the IIS logs and examine the URI strings being
+#accessed to find indicators and verify that the http response code equals 200.
+
+
+index=botsv1 sourcetype=iis sc_status=200 |stats values(cs_uri_stem) as cs_uri_stem
+
+#or
+
+index=botsv1 sourcetype=iis sc_status=200 |stats values(cs_uri_stem) as cs_uri_stem | stats count by cs_uri_stem
+
+#or
+
+index=botsv1 sourcetype=iis sc_status=200 |stats values(cs_uri_stem) as cs_uri_stem | stats count by cs_uri_stem | top cs_uri_stem
+
+#or
+
+index=botsv1 sourcetype=iis sc_status=200 |stats values(cs_uri_stem) | table values(cs_uri_stem) | rename values(cs_uri_stem) as Identified_URI_Strings
+
+#Click
+>Identifying Where a Brute Force Attack Originated
+#What IP address is likely attempting a brute force password attack against imnotreallybatman.com?
+
+#Looking in Wire Data - stream:http again and looking at src
+
+index=botsv1 sourcetype=stream:http| top limit=20 src
+
+#we can pivot into the source of the traffic to see that there are a number of source IP addresses that are 
+#associated with http events. 
+#Based on our earlier searches:
+#refine searches with with server address/ip of imreallynotbatman.com
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70"
+
+#Look for http traffic going to that IP address. When we pivot to the source IP addresses, 
+we are left with three source addresses of interest, two are external and one looks familiar.
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70"| top limit=20 src
+
+#look at the http_method of these requests, we see nearly twice as many POSTs as GETs. 
+#Since we are talking about a brute force password attack of a web site, 
+#what is the most likely http method for this kind of attack? POST?
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" http_method="*" | stats count by http_method
+
+#or
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" http_method=POST
+
+#or
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" | stats count by src,http_method | sort count desc
+
+# IP address is likely attempting a brute force password attack--
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" http_method="*" | stats count by http_method,src | sort count desc
+
+#result: src = 40.80.148.42
+
+#Finding Passwords in HTTP Wire Data
+#If the website is not encrypted or it is being decrypted for logging, we may be able to see login attempts.
+#The form_data field contains information being passed from the client browser to the web server. 
+#If we search the form_data using wildcards for “username" and "passwd” within the field. 
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" http_method=POST form_data=*username*passwd* 
+|table form_data
+
+#or
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" http_method=POST form_data=*username*passwd* 
+|stats count by src
+
+#Click>
+#Identifying the First Password Attempted in a Brute Force Attack
+#What was the first brute force password used?
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* | table _time form_data
+
+#or
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* |table _time form_data |reverse
+
+#or
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* 
+|table _time form_data | sort _time desc | top limit=10 _time,form_data
+
+#Using regular expression
+
+index=botsv1 sourcetype=stream:http http_method=POST 
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+|search userpassword=* 
+| reverse 
+| head 1 
+| table userpassword
+
+#click>
+#Extracting Passwords from Events (Part 1 of 2)
+#One of the passwords in the brute force attack is James Brodsky's favorite Coldplay song. Which six character song is it?
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* | table _time form_data | reverse
+
+#Extracting Passwords from form_data
+#As you can see from our search the idea is that we use the rex command to extract values from the form_data field
+#and look for a string that starts with passwd= and then immediately capture all the “word characters”, that is 0-9 A-Z 
+#and _. When it reaches the end of those character matches and hits the "&" in the data returned, 
+#it will stop capturing values. The resulting values extracted are placed in a new field called "userpassword."
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* 
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+| head 10 
+| table userpassword
+
+#Calculating the Length
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* 
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+| eval lenpword=len(userpassword) 
+| head 10 
+| table userpassword lenpword
+
+#Selecting specific passwds with len=6
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* 
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+| eval lenpword=len(userpassword) 
+| search lenpword=6 
+| table userpassword lenpword
+
+#click>
+#Using Lookups to Correlate Events (Part 2 of 2)
+#Reference values can be stored in lookups and can be used over and over again with searches. 
+#Searching a lookup
+| inputlookup cp.csv
+
+#Tweaking existing lookup for a new lookup 
+| inputlookup cp.csv 
+| eval song=lower(Songs) 
+| fields song
+
+#using the search and the lookup command which compares the lookup value, 
+#in this case song from the coldplay.csv file, to the password value from the events. If we get a hit, output the song.
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* 
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+| eval lenpword=len(userpassword) 
+| search lenpword=6 
+| eval password=lower(userpassword) 
+| lookup coldplay.csv song as password OUTPUTNEW song 
+| search song=* 
+| table song
+
+
+#Click>
+#Identifying the Password Used To Gain Access
+#What was the correct password for admin access to the content management system running imreallynotbatman.com?'
+#Find the count/frequency of password used
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* dest_ip=192.168.250.70 
+| rex field=form_data "passwd=(?<userpassword>\w+)"
+| stats count by userpassword 
+| sort - count
+
+#or
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* dest_ip=192.168.250.70 
+| rex field=form_data "passwd=(?<userpassword>\w+)"
+| stats count by userpassword 
+| sort - count | table userpassword count | sort count desc
+
+#By adding the values function to our stats command, we can see that the brute force attack came from 23.22.63.114 
+#but it appears that the actual penetration with the correct password came from 40.80.148.42. 
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* dest_ip=192.168.250.70 
+| rex field=form_data "passwd=(?<userpassword>\w+)"
+| stats count values(src) by userpassword 
+| sort - count
+
+#Collecting Additional Attributes Around the Login Events
+index=botsv1 sourcetype=stream:http form_data=*username*passwd* dest_ip=192.168.250.70 src=40.80.148.42 | rex field=form_data "passwd=(?<userpassword>\w+)"| search userpassword=* | table _time uri userpassword
+
+#click>
+#Finding the Average Length of the Passwords During the Brute Force Attack
+
+index=botsv1 sourcetype=stream:http http_method=POST 
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+| search userpassword=* 
+| eval mylen=len(userpassword) 
+| stats avg(mylen) as avg_len_http 
+| eval avg_len_http=round(avg_len_http,0)
+
+#Click>
+#Determining The Elapsed Time Between Events
+#How many seconds elapsed between the time the brute force password scan identified the 
+#correct password and the compromised login
+
+#We now want to understand when the brute force attack gave the adversary the correct password and 
+#when the adversary used this password to get into the system. 
+
+index=botsv1 sourcetype=stream:http  | rex field=form_data "passwd=(?<userpassword>\w+)" | search userpassword=batman | table _time userpassword src
+
+#using transaction command instead of manually calculating
+index=botsv1 sourcetype=stream:http
+| rex field=form_data "passwd=(?<userpassword>\w+)" 
+| search userpassword=batman 
+| transaction userpassword 
+| table duration
+
+#transaction command gives us an easy way to group events together based on one or more fields and returns
+# a field called duration that calculates the difference between the first and last event in a transaction.
+# A transaction is defined by the common value or values specified. 
+
+#Click>
+#Identifying the Number of Unique Passwords Attempted During the Brute Force Attack
+#count of pswds attempted
+
+index=botsv1 sourcetype=stream:http form_data=*username*passwd*  
+| rex field=form_data "passwd=(?<userpassword>\w+)" | stats count(userpassword)
+
+#count of distinct passwords attempted
+index=botsv1 sourcetype=stream:http form_data=*username*passwd*  
+| rex field=form_data "passwd=(?<userpassword>\w+)" | stats dc(userpassword)
+
+#Click>
+#Identifying the Executable Uploaded
+#What is the name of the executable uploaded by P01s0n1vy?
+
+#Searches for executables in stream:http
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" *.exe
+
+#or 
+
+index=botsv1 sourcetype=stream:http dest="192.168.250.70" *.exe | stats count by part_filename{}
+
+#Search for EXEs in Suricata
+index=botsv1 sourcetype=suricata dest_ip=192.168.250.70 .exe
+
+#or
+index=botsv1 sourcetype=suricata dest_ip=192.168.250.70 .exe | stats count by fileinfo.filename
+
+#using different fields or hostnames
+index=botsv1 sourcetype=suricata (dest="192.168.250.70" OR dest_ip="192.168.250.70") .exe
+
+#or
+index=botsv1 sourcetype=suricata (dest=imreallynotbatman.com OR dest="192.168.250.70") http.http_method=POST .exe | stats count by fileinfo.filename
+
+#or
+
+index=botsv1 sourcetype=suricata (dest=imreallynotbatman.com OR dest="192.168.250.70") http.http_method=POST .exe | stats count by dest
+
+#Capturing the source of executable
+index=botsv1 sourcetype=suricata dest_ip="192.168.250.70" http.http_method=POST .exe
+
+#Determining the Hash(MD5) of executable upload/uploaded file
+#to find hash of executable from log stream
+
+index=botsv1 3791.exe
+
+#or
+
+index=botsv1 3791.exe sourcetype="*" | top limit=10 sourcetype
+
+#About sysmon:Sysmon can do is record the hash of the process image using a number of different hashing functions. 
+#Based on that, we can pivot into sysmon data and look there
+
+index=botsv1 3791.exe sourcetype=XmlWinEventLog:Microsoft-Windows-Sysmon/Operational
+
+#Sysmon can also return values like the command that was issued to start a process execution as well 
+#as the parent command line. This can be helpful to see chained processes where one process starts and then 
+#spawns subsequent processes. 
+
+#isloating md5
+#using CommandLine & ParentCommandLine
+#note select and add additional fields to your 'Interesting fields'
+
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "3791.exe" CommandLine="*" ParentCommandLine="*"
+
+#choose the right fields
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "3791.exe" CommandLine="*" 
+ParentCommandLine="*" | table _time ProcessId ParentProcessid CommandLine ParentCommandLine
+
+# focus on the EventCode field in Sysmon and search where that value is 1, we are able to see all of the Process Execution events
+
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "3791.exe" EventCode="1" CommandLine="*" 
+ParentCommandLine="*" | table _time EventCode ProcessId ParentProcessid CommandLine ParentCommandLine
+
+
+
+#search in verbose mode and look for MD5
+
+index=botsv1 source="WinEventLog:Microsoft-Windows-Sysmon/Operational" "3791.exe" EventCode="1" CommandLine="3791.exe" 
+ParentCommandLine="*" | stats values(MD5)
+
+#should be 
+#MD5=AAE3F5A29935E6ABCC2C2754D12A9AF0
+
+Continued in 'Investigating_with_Splunk_Workshop_App_2.txt'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

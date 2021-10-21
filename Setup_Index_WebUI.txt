@@ -1,0 +1,37 @@
+Create Index via splunk web ui:(in a non-indexer cluster)
+
+Settings > Index > New Index
+--Index name: LogIndex
+--Index Data Type : Events
+--Home Path: default (unless choosing different location)
+--Cold Path: default (unless choosing different location)
+--Thawed Path: default (unless choosing different location)
+--Data Integrity check : Disabled (by default)
+  enable if data integrity check required..
+--The maximum size of the entire index. Defaults to 5GB
+--The maximum size of each index bucket. When setting the maximum size, use auto_high_volume for high volume
+  indexes (such as the main index); otherwise, use auto.
+--The frozen archive path :$SPLUNK_DB/LogIndex/Archived
+--(Set this field if you want to archive frozen buckets)
+App : search and reporting
+
+For storage optimization
+--Tsidx Retention Policy : disabled (specific note if enabled)
+--(specific note if choosen)
+
+To change properties that are greyed out, edit indexes.conf, then restart the indexer.
+Check for index in : (if windows)
+C:\Program Files\Splunk\var\lib\splunk\logindex
+
+--check in
+C:\Program Files\Splunk\etc\system\default
+C:\Program Files\Splunk\etc\system\local
+
+--Add data into newly created index
+
+
+
+
+
+
+

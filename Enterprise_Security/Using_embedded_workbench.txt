@@ -1,0 +1,19 @@
+Example of using the embedded workbench
+
+The embedded workbench provides a simplified drill-down experience, reduces the number of open tabs, 
+and makes it easier to determine notable event trends.
+Using the source field as an example, consider a value where you want more context about an asset. 
+
+From the Enterprise Security menu bar, perform the following steps:
+
+Go to Incident Review.
+
+From a notable event that contains a Source (src) value:
+
+Click the source field actions menu.
+
+Scroll down to the menu items that start with "workbench" and select one such as Workbench - Authentication (src).
+
+View source analysis related to investigated assets or identities. The data source is the Authentication 
+data model. Results include events that contain artifacts in the src, dest, user, user_id, 
+user_role, src_user, src_user_id, src_user_role, or vendor_account fields.

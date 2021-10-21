@@ -1,0 +1,13 @@
+Adding a Splunk event to an investigation
+
+Add an event from the Splunk search page to an investigation. You can only add an event to an investigation from the search page in the Splunk Enterprise Security context.
+
+Expand the event details to see the Event Actions menu and other information.
+
+Click Event Actions and select Add to Investigation.
+
+A dialog box opens.Select an assignee.If you have the manage_all_investigations capability, you can select User to see investigations where you are a collaborator or you can select All to see all the investigations in the system. If you don't have manage_all_investigations, then the assignee dropdown menu does not appear.
+
+Select from existing investigations, or create one.If you have the manage_all_investigations capability, and All selected as an assignee, you can add events to investigations where you are not a collaborator. This is used, for example, when a senior analyst is triaging and assigning events to the investigations of junior analysts.
+
+Click Save.
